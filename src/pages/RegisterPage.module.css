@@ -1,8 +1,8 @@
 .registerContainer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
+  position: fixed;
+  inset: 0; /* Modern CSS shorthand that works in all modern browsers */
+  display: grid;
+  place-items: center;
   background-color: #fafafa;
 }
 

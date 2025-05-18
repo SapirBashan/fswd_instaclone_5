@@ -1,11 +1,10 @@
 .loginContainer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
+  position: fixed;
+  inset: 0; /* Shorthand for top: 0, right: 0, bottom: 0, left: 0 */
+  display: grid;
+  place-items: center;
   background-color: #fafafa;
 }
-
 .loginForm {
   background-color: white;
   border: 1px solid #dbdbdb;
