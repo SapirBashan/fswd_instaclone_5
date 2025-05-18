@@ -3,7 +3,7 @@
   width: 100%;
   max-width: 600px;
   margin: 0 auto;
-  color: #262626; /* Default text color */
+  color: #262626;
 }
 
 .heading {
@@ -13,11 +13,133 @@
   color: #262626;
 }
 
-.feedContainer {
+.loadingContainer,
+.errorContainer,
+.emptyContainer {
+  background-color: white;
+  border: 1px solid #dbdbdb;
+  border-radius: 3px;
+  padding: 40px 20px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.errorContainer button {
+  background-color: #0095f6;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: 600;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+.errorContainer button:hover {
+  background-color: #0086e0;
+}
+
+.postCard {
   background-color: white;
   border: 1px solid #dbdbdb;
   border-radius: 3px;
   margin-bottom: 20px;
-  padding: 20px;
-  color: #262626; /* Feed content text color */
+  overflow: hidden;
+}
+
+.postHeader {
+  padding: 12px;
+  border-bottom: 1px solid #efefef;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+}
+
+.userAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #0095f6;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-right: 12px;
+}
+
+.userName {
+  font-weight: 600;
+  color: #262626;
+}
+
+.postTitle {
+  padding: 12px 16px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.postBody {
+  padding: 8px 16px 16px;
+  color: #262626;
+}
+
+.postFooter {
+  border-top: 1px solid #efefef;
+  padding: 8px 16px;
+}
+
+.postActions {
+  display: flex;
+  gap: 16px;
+}
+
+.actionButton {
+  background: none;
+  border: none;
+  padding: 0;
+  font-weight: 500;
+  color: #262626;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.actionButton:hover {
+  color: #8e8e8e;
+}
+
+.loadMoreContainer {
+  text-align: center;
+  margin: 20px 0 40px;
+}
+
+.loadMoreButton {
+  background-color: #0095f6;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.loadMoreButton:hover {
+  background-color: #0086e0;
+}
+
+.loadMoreButton:disabled {
+  background-color: #b2dffc;
+  cursor: not-allowed;
+}
+
+.noMorePosts {
+  color: #8e8e8e;
+  font-size: 14px;
 }

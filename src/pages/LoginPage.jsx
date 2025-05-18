@@ -1,11 +1,15 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { UserAPI } from "../utils/ServerDB";
+import { UserStorage } from "../utils/LocalStorage";
 import style from "./LoginPage.module.css";
 
 const LoginPage = ({ onLoginSuccess }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,46 +21,35 @@ const LoginPage = ({ onLoginSuccess }) => {
     }
 
     try {
-      // Set loading state if needed
+      setIsLoading(true);
       setError("");
 
-      // Fetch users from your local JSON server
-      const response = await fetch("http://localhost:3000/users");
+      // Use the UserAPI login method from ServerDB utility
+      const result = await UserAPI.login(username, password);
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
+      if (result.success) {
+        // Login successful
+        console.log("Login successful", result.user);
 
-      const users = await response.json();
-
-      // Find user with matching username and password
-      const user = users.find(
-        (user) => user.username === username && user.website === password
-      );
-
-      if (user) {
-        // User found, login successful
-        console.log("Login successful", user);
-
-        // Store user data in localStorage if needed
-        localStorage.setItem(
-          "user",
-          JSON.stringify({
-            id: user.id,
-            username: user.username,
-            // Don't store password in localStorage!
-          })
-        );
+        // Use UserStorage utility to save user data
+        UserStorage.saveUser({
+          id: result.user.id,
+          username: result.user.username,
+          name: result.user.name,
+          email: result.user.email,
+        }, rememberMe); // Pass rememberMe option
 
         // Call the login success handler passed from parent
         onLoginSuccess();
       } else {
-        // No matching user found
-        setError("Invalid username or password");
+        // Authentication failed
+        setError(result.message || "Invalid username or password");
       }
     } catch (error) {
       console.error("Login error:", error);
       setError("Error connecting to the server. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -74,6 +67,7 @@ const LoginPage = ({ onLoginSuccess }) => {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className={style.input}
+              disabled={isLoading}
             />
           </div>
 
@@ -84,11 +78,28 @@ const LoginPage = ({ onLoginSuccess }) => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className={style.input}
+              disabled={isLoading}
             />
           </div>
+          
+          <div className={style.rememberMeContainer}>
+            <label className={style.rememberMeLabel}>
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className={style.rememberMeCheckbox}
+              />
+              Remember me
+            </label>
+          </div>
 
-          <button type="submit" className={style.loginButton}>
-            Log In
+          <button 
+            type="submit" 
+            className={style.loginButton}
+            disabled={isLoading}
+          >
+            {isLoading ? "Logging in..." : "Log In"}
           </button>
         </form>
 

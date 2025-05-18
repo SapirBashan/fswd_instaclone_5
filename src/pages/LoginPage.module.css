@@ -81,3 +81,23 @@
 .registerLink a:hover {
   text-decoration: underline;
 }
+
+/* Add these styles to your existing CSS module */
+.rememberMeContainer {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  width: 100%;
+}
+
+.rememberMeLabel {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #262626;
+  cursor: pointer;
+}
+
+.rememberMeCheckbox {
+  margin-right: 8px;
+}

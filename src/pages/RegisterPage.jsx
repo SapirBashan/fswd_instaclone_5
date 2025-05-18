@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { UserAPI } from "../utils/ServerDB";
+import { UserStorage } from "../utils/LocalStorage";
 import style from "./RegisterPage.module.css";
 
 const RegisterPage = ({ onRegisterSuccess }) => {
@@ -7,39 +9,79 @@ const RegisterPage = ({ onRegisterSuccess }) => {
     username: "",
     email: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
+    name: "", // Added name field for user profile
   });
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: value
+      [name]: value,
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Basic validation
     for (const key in formData) {
-      if (!formData[key].trim()) {
+      if (key !== "name" && !formData[key].trim()) {
+        // Name can be optional
         setError("All fields are required");
         return;
       }
     }
-    
+
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords don't match");
       return;
     }
 
-    // In a real app, you would call an API here
-    // For now, we'll simulate a successful registration
-    setTimeout(() => {
+    try {
+      setIsLoading(true);
+      setError("");
+
+      // Check if username already exists
+      const existingUser = await UserAPI.getByUsername(formData.username);
+
+      if (existingUser) {
+        setError("Username already taken");
+        setIsLoading(false);
+        return;
+      }
+
+      // Create new user with UserAPI
+      const newUser = await UserAPI.create({
+        username: formData.username,
+        email: formData.email,
+        website: formData.password, // Store password in website field for this demo
+        name: formData.name || formData.username, // Use username as name if not provided
+      });
+
+      console.log("Registration successful", newUser);
+
+      // Save user data to local storage
+      UserStorage.saveUser(
+        {
+          id: newUser.id,
+          username: newUser.username,
+          name: newUser.name,
+          email: newUser.email,
+        },
+        true
+      ); // Default to "remember me" for new registrations
+
+      // Notify parent of successful registration
       onRegisterSuccess();
-    }, 1000);
+    } catch (error) {
+      console.error("Registration error:", error);
+      setError("Error creating account. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -47,7 +89,7 @@ const RegisterPage = ({ onRegisterSuccess }) => {
       <div className={style.registerForm}>
         <h2 className={style.heading}>Create an Account</h2>
         {error && <p className={style.errorMessage}>{error}</p>}
-        
+
         <form onSubmit={handleSubmit}>
           <div className={style.formGroup}>
             <input
@@ -57,9 +99,22 @@ const RegisterPage = ({ onRegisterSuccess }) => {
               value={formData.username}
               onChange={handleChange}
               className={style.input}
+              disabled={isLoading}
             />
           </div>
-          
+
+          <div className={style.formGroup}>
+            <input
+              type="text"
+              name="name"
+              placeholder="Full Name (optional)"
+              value={formData.name}
+              onChange={handleChange}
+              className={style.input}
+              disabled={isLoading}
+            />
+          </div>
+
           <div className={style.formGroup}>
             <input
               type="email"
@@ -68,9 +123,10 @@ const RegisterPage = ({ onRegisterSuccess }) => {
               value={formData.email}
               onChange={handleChange}
               className={style.input}
+              disabled={isLoading}
             />
           </div>
-          
+
           <div className={style.formGroup}>
             <input
               type="password"
@@ -79,9 +135,10 @@ const RegisterPage = ({ onRegisterSuccess }) => {
               value={formData.password}
               onChange={handleChange}
               className={style.input}
+              disabled={isLoading}
             />
           </div>
-          
+
           <div className={style.formGroup}>
             <input
               type="password"
@@ -90,14 +147,19 @@ const RegisterPage = ({ onRegisterSuccess }) => {
               value={formData.confirmPassword}
               onChange={handleChange}
               className={style.input}
+              disabled={isLoading}
             />
           </div>
-          
-          <button type="submit" className={style.registerButton}>
-            Sign Up
+
+          <button
+            type="submit"
+            className={style.registerButton}
+            disabled={isLoading}
+          >
+            {isLoading ? "Creating Account..." : "Sign Up"}
           </button>
         </form>
-        
+
         <div className={style.loginLink}>
           Already have an account? <Link to="/login">Log in</Link>
         </div>

@@ -1,13 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 import LoginPage from "./pages/LoginPage";
 import { Routes, Route, Navigate } from "react-router-dom";
 import SideNav from "./components/SideNev";
 import RegisterPage from "./pages/RegisterPage";
 import HomePage from "./pages/HomePage";
+import { UserStorage } from "./utils/LocalStorage";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  
+  // Check for existing user session on app load
+  useEffect(() => {
+    const checkAuth = () => {
+      const isLoggedIn = UserStorage.isLoggedIn();
+      setIsAuthenticated(isLoggedIn);
+    };
+    
+    checkAuth();
+  }, []);
   
   // Authentication handlers
   const handleLogin = () => {
@@ -15,6 +26,7 @@ function App() {
   };
   
   const handleLogout = () => {
+    UserStorage.logout(); // Clear user data
     setIsAuthenticated(false);
   };
 
