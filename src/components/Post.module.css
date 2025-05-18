@@ -1,0 +1,218 @@
+.post {
+  background-color: white;
+  border: 1px solid #dbdbdb;
+  border-radius: 3px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+/* External post style - more compact */
+.external {
+  max-width: 600px;
+}
+
+/* Internal post style - more expanded */
+.internal {
+  max-width: 800px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.postHeader {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #efefef;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+}
+
+.userAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #0095f6;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-right: 12px;
+}
+
+.internal .userAvatar {
+  width: 42px;
+  height: 42px;
+  font-size: 18px;
+}
+
+.userName {
+  font-weight: 600;
+  color: #262626;
+  text-decoration: none;
+}
+
+.userName:hover {
+  text-decoration: underline;
+}
+
+.postTitle {
+  padding: 12px 16px;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.internal .postTitle {
+  font-size: 20px;
+  padding: 16px 20px 8px;
+}
+
+.postBody {
+  padding: 0 16px 16px;
+  color: #262626;
+  position: relative;
+  max-height: 100px;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.internal .postBody {
+  padding: 0 20px 20px;
+  font-size: 16px;
+  line-height: 1.5;
+  max-height: none;
+}
+
+.expanded {
+  max-height: 2000px;
+}
+
+.readMoreButton {
+  background: none;
+  border: none;
+  color: #8e8e8e;
+  padding: 0;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 8px;
+  display: block;
+}
+
+.postFooter {
+  padding: 8px 16px;
+  border-top: 1px solid #efefef;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.internal .postFooter {
+  padding: 12px 20px;
+}
+
+.postActions {
+  display: flex;
+  gap: 8px;
+}
+
+.interactionButtons {
+  display: flex;
+  gap: 16px;
+}
+
+.actionButton {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 14px;
+  color: #262626;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.actionButton:hover {
+  color: #8e8e8e;
+}
+
+.stats {
+  display: flex;
+  gap: 12px;
+  font-size: 14px;
+  color: #8e8e8e;
+}
+
+.postMeta {
+  padding: 0 20px 12px;
+  font-size: 14px;
+  color: #8e8e8e;
+  display: flex;
+  gap: 16px;
+}
+
+.editForm {
+  padding: 16px;
+  width: 100%;
+}
+
+.editTitle {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 12px;
+  border: 1px solid #dbdbdb;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.editBody {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #dbdbdb;
+  border-radius: 4px;
+  font-size: 16px;
+  resize: vertical;
+  margin-bottom: 16px;
+  font-family: inherit;
+}
+
+.editActions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.saveButton, .cancelButton {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+
+.saveButton {
+  background-color: #0095f6;
+  color: white;
+}
+
+.saveButton:hover {
+  background-color: #0086e0;
+}
+
+.cancelButton {
+  background-color: #efefef;
+  color: #262626;
+}
+
+.error {
+  color: #ed4956;
+  padding: 8px 16px;
+  margin-top: 8px;
+  background-color: #fef0f0;
+  border-radius: 4px;
+  font-size: 14px;
+}

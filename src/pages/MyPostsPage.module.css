@@ -1,0 +1,52 @@
+.myPostsPage {
+  padding: 20px;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  color: #262626;
+}
+
+.pageHeader {
+  margin-bottom: 24px;
+  border-bottom: 1px solid #dbdbdb;
+  padding-bottom: 16px;
+}
+
+.heading {
+  font-size: 28px;
+  margin: 0 0 8px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.subheading {
+  font-size: 16px;
+  color: #8e8e8e;
+  margin: 0;
+}
+
+.loadingContainer, 
+.errorContainer,
+.emptyContainer {
+  background-color: white;
+  border: 1px solid #dbdbdb;
+  border-radius: 3px;
+  padding: 40px 20px;
+  text-align: center;
+  margin: 24px 0;
+}
+
+.errorContainer button {
+  background-color: #0095f6;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: 600;
+  margin-top: 12px;
+  cursor: pointer;
+}
+
+.errorContainer button:hover {
+  background-color: #0086e0;
+}

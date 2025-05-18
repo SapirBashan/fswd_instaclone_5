@@ -13,35 +13,47 @@
 // which includes:
 // the logout and the Info
 
-
-
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import style from './SideNev.module.css';
+import React from "react";
+import { Link, useLocation } from "react-router-dom";
+import style from "./SideNev.module.css";
 
 const SideNav = ({ onLogout }) => {
   const location = useLocation();
-  
+
   return (
     <nav className={style.sideNav}>
-      <div className={style.sideNavLogo}>
-        Instagram
-      </div>
-      
+      <div className={style.sideNavLogo}>Instagram</div>
+
       <div className={style.navLinks}>
-        <Link to="/" className={`${style.navItem} ${location.pathname === '/' ? style.active : ''}`}>
+        <Link
+          to="/"
+          className={`${style.navItem} ${
+            location.pathname === "/" ? style.active : ""
+          }`}
+        >
           <span className={style.navIcon}>🏠</span> Home
         </Link>
-        
-        <Link to="/posts" className={`${style.navItem} ${location.pathname === '/posts' ? style.active : ''}`}>
-          <span className={style.navIcon}>📸</span> Posts
-        </Link>
-        
-        <Link to="/albums" className={`${style.navItem} ${location.pathname === '/albums' ? style.active : ''}`}>
+
+        <Link
+          to="/albums"
+          className={`${style.navItem} ${
+            location.pathname === "/albums" ? style.active : ""
+          }`}
+        >
           <span className={style.navIcon}>🖼️</span> Albums
         </Link>
+
+        <Link
+          to="/my-posts"
+          className={`${style.navItem} ${
+            location.pathname === "/my-posts" ? style.active : ""
+          }`}
+        >
+          <span className={style.icon}>📝</span>
+          <span className={style.label}>My Posts</span>
+        </Link>
       </div>
-      
+
       <div className={style.logoutSection}>
         <button onClick={onLogout} className={style.logoutButton}>
           <span className={style.navIcon}>🚪</span> Logout

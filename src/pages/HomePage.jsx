@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { PostAPI } from "../utils/ServerDB";
-import { UserAPI } from "../utils/ServerDB";
+import { PostAPI, UserAPI } from "../utils/ServerDB";
 import { UserStorage } from "../utils/LocalStorage";
+import Post from "../components/Post"; // Import the Post component
 import style from "./HomePage.module.css";
 
 const HomePage = () => {
@@ -16,29 +16,39 @@ const HomePage = () => {
 
   // Function to fetch user details for posts
   const fetchUserDetails = async (postList) => {
-    const userIds = [...new Set(postList.map((post) => post.userId))];
-    const userDetails = { ...users };
+    try {
+      const userIds = [...new Set(postList.map((post) => post.userId))];
+      const userDetails = { ...users };
+      let hasNewUsers = false;
 
-    for (const userId of userIds) {
-      // Skip if we already have this user's details
-      if (userDetails[userId]) continue;
-
-      try {
-        const user = await UserAPI.getById(userId);
-        userDetails[userId] = user;
-      } catch (e) {
-        console.error(`Error fetching details for user ${userId}`, e);
-        userDetails[userId] = { username: "Unknown User" };
+      for (const userId of userIds) {
+        // Skip if we already have this user's details
+        if (userDetails[userId]) continue;
+        
+        hasNewUsers = true;
+        try {
+          const user = await UserAPI.getById(userId);
+          userDetails[userId] = user;
+        } catch (e) {
+          console.error(`Error fetching details for user ${userId}`, e);
+          userDetails[userId] = { username: "Unknown User" };
+        }
       }
-    }
 
-    setUsers(userDetails);
+      // Only update state if we have new users
+      if (hasNewUsers) {
+        setUsers(userDetails);
+      }
+    } catch (error) {
+      console.error("Error in fetchUserDetails:", error);
+    }
   };
 
   // Initial load of posts
   const fetchRandomPosts = async () => {
     try {
       setLoading(true);
+      setError(null);
 
       // Get current user to exclude their posts from feed
       const currentUser = UserStorage.getUser();
@@ -103,15 +113,13 @@ const HomePage = () => {
     }
   };
 
+  // Note: This effect will only run once on component mount (empty dependency array)
+  // For a production app, you might want to add dependencies or use a different pattern
+  // to handle function recreation without useCallback
   useEffect(() => {
     fetchRandomPosts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Format date for display
-  const formatDate = (dateString) => {
-    const options = { year: "numeric", month: "long", day: "numeric" };
-    return new Date(dateString).toLocaleDateString(undefined, options);
-  };
 
   return (
     <div className={style.homePage}>
@@ -126,7 +134,7 @@ const HomePage = () => {
       {error && (
         <div className={style.errorContainer}>
           <p>{error}</p>
-          <button onClick={() => window.location.reload()}>Retry</button>
+          <button onClick={fetchRandomPosts}>Retry</button>
         </div>
       )}
 
@@ -137,29 +145,12 @@ const HomePage = () => {
       )}
 
       {posts.map((post) => (
-        <div key={post.id} className={style.postCard}>
-          <div className={style.postHeader}>
-            <div className={style.userInfo}>
-              <div className={style.userAvatar}>
-                {users[post.userId]?.username?.charAt(0).toUpperCase() || "?"}
-              </div>
-              <div className={style.userName}>
-                {users[post.userId]?.username || "Unknown User"}
-              </div>
-            </div>
-          </div>
-
-          <h2 className={style.postTitle}>{post.title}</h2>
-          <p className={style.postBody}>{post.body}</p>
-
-          <div className={style.postFooter}>
-            <div className={style.postActions}>
-              <button className={style.actionButton}>❤️ Like</button>
-              <button className={style.actionButton}>💬 Comment</button>
-              <button className={style.actionButton}>📤 Share</button>
-            </div>
-          </div>
-        </div>
+        <Post
+          key={post.id}
+          post={post}
+          user={users[post.userId]}
+          variant="external"
+        />
       ))}
 
       {!loading && !error && posts.length > 0 && (
