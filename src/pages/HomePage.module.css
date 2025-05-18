@@ -1,0 +1,21 @@
+.homePage {
+  padding: 20px;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.heading {
+  font-size: 24px;
+  margin-bottom: 20px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.feedContainer {
+  background-color: white;
+  border: 1px solid #dbdbdb;
+  border-radius: 3px;
+  margin-bottom: 20px;
+  padding: 20px;
+}

@@ -1,0 +1,74 @@
+.sideNav {
+  width: 220px;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  background-color: white;
+  border-right: 1px solid #dbdbdb;
+  padding: 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.sideNavLogo {
+  font-family: 'Billabong', cursive;
+  font-size: 32px;
+  margin-bottom: 40px;
+  color: #262626;
+}
+
+.navLinks {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  padding: 15px 10px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  text-decoration: none;
+  color: #262626;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.navItem:hover {
+  background-color: #f8f8f8;
+}
+
+.navItem.active {
+  font-weight: 700;
+}
+
+.navIcon {
+  margin-right: 15px;
+  font-size: 20px;
+}
+
+.logoutSection {
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid #dbdbdb;
+}
+
+.logoutButton {
+  width: 100%;
+  padding: 10px;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  color: #262626;
+}
+
+.logoutButton:hover {
+  color: #ed4956;
+}
