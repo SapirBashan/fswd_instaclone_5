@@ -1,4 +1,4 @@
-CreatePostForm.createPostContainer {
+.createPostContainer {
   margin-bottom: 30px;
 }
 
@@ -27,24 +27,42 @@ CreatePostForm.createPostContainer {
   margin-bottom: 16px;
 }
 
+/* Enhanced input styling with better contrast */
 .input, .textarea {
   width: 100%;
   padding: 12px;
   border: 1px solid #dbdbdb;
   border-radius: 4px;
   font-size: 14px;
-  color: #262626;
+  color: #262626; /* Darker text for better contrast */
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: #ffffff; /* Explicit white background */
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .textarea {
   resize: vertical;
   min-height: 120px;
+  line-height: 1.5; /* Improved line height for better readability */
 }
 
 .input:focus, .textarea:focus {
   outline: none;
   border-color: #a8a8a8;
+  box-shadow: 0 0 0 1px rgba(0, 149, 246, 0.15); /* Subtle focus shadow */
+}
+
+/* Added placeholder styling */
+.input::placeholder, .textarea::placeholder {
+  color: #8e8e8e; /* Lighter but still visible */
+}
+
+/* Added disabled styling */
+.input:disabled, .textarea:disabled {
+  background-color: #f0f0f0;
+  color: #8e8e8e;
+  cursor: not-allowed;
+  border-color: #ebebeb;
 }
 
 .formActions {
@@ -59,6 +77,7 @@ CreatePostForm.createPostContainer {
   font-weight: 600;
   cursor: pointer;
   border: none;
+  transition: background-color 0.2s ease; /* Added transition */
 }
 
 .submitButton {
@@ -80,11 +99,24 @@ CreatePostForm.createPostContainer {
   color: #262626;
 }
 
+/* Added hover effect for cancel button */
+.cancelButton:hover {
+  background-color: #dbdbdb;
+}
+
+/* Added disabled styling for cancel button */
+.cancelButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Enhanced error styling */
 .error {
-  color: #ed4956;
-  padding: 8px;
+  color: #cb2027; /* Darker red for better contrast */
+  padding: 10px;
   margin-bottom: 16px;
   background-color: #fef0f0;
   border-radius: 4px;
   font-size: 14px;
+  border: 1px solid #ffd1d1; /* Added border for better visibility */
 }
