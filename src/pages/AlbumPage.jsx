@@ -3,12 +3,12 @@ import { AlbumAPI, PhotoAPI } from "../utils/ServerDB";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { UserStorage } from "../utils/LocalStorage";
 import style from "./AlbumPage.module.css";
-import { 
-  AlbumListView, 
-  PhotoFormView, 
-  LightboxView, 
-  PhotosGridView, 
-  AlbumDetailView 
+import {
+  AlbumListView,
+  PhotoFormView,
+  LightboxView,
+  PhotosGridView,
+  AlbumDetailView,
 } from "../components/AlbumPageViews";
 
 const AlbumPage = () => {
@@ -180,23 +180,34 @@ const AlbumPage = () => {
     editingPhoto,
     setNewPhotoUrl,
     handlePhotoAction,
-    setEditingPhoto
+    setEditingPhoto,
   };
+
+//   const photosGridViewProps = {
+//     photos,
+//     hasMore,
+//     loading,
+//     loadingImages,
+//     setLoadingImages,
+//     setFullScreenImage,
+//     setEditingPhoto,
+//     setNewPhotoUrl,
+//     handlePhotoAction,
+//     setPage,
+//     photosContainerRef,
+//   };
 
   const photosGridViewProps = {
     photos,
     hasMore,
     loading,
-    loadingImages,
-    setLoadingImages,
     setFullScreenImage,
     setEditingPhoto,
     setNewPhotoUrl,
     handlePhotoAction,
     setPage,
-    photosContainerRef
+    photosContainerRef,
   };
-
   const albumListViewProps = {
     albums,
     loading,
@@ -205,7 +216,7 @@ const AlbumPage = () => {
     handleCreateAlbum,
     setNewAlbumTitle,
     setSelectedAlbum,
-    setSearch
+    setSearch,
   };
 
   const albumDetailViewProps = {
@@ -213,14 +224,14 @@ const AlbumPage = () => {
     setSelectedAlbum,
     navigate,
     photoFormViewProps,
-    photosGridViewProps
+    photosGridViewProps,
   };
 
   return (
     <div className={style.container}>
-      <LightboxView 
-        fullScreenImage={fullScreenImage} 
-        setFullScreenImage={setFullScreenImage} 
+      <LightboxView
+        fullScreenImage={fullScreenImage}
+        setFullScreenImage={setFullScreenImage}
       />
 
       {error && (
@@ -232,10 +243,11 @@ const AlbumPage = () => {
 
       {loading && <div className={style.loadingIndicator}>Loading...</div>}
 
-      {selectedAlbum ? 
-        <AlbumDetailView {...albumDetailViewProps} /> : 
+      {selectedAlbum ? (
+        <AlbumDetailView {...albumDetailViewProps} />
+      ) : (
         <AlbumListView {...albumListViewProps} />
-      }
+      )}
     </div>
   );
 };

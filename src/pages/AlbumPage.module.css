@@ -229,3 +229,12 @@ button:hover {
 .photoCard img {
   cursor: pointer;
 }
+
+.loadedImage {
+  opacity: 1;
+  transition: opacity 0.3s ease-in;
+}
+
+.hiddenImage {
+  opacity: 0;
+}
