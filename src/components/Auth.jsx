@@ -24,41 +24,41 @@ const Auth = ({
           name: "",
         }
   );
-  
+
   // General state
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  
+
   // Security-related state
   const [isAccountLocked, setIsAccountLocked] = useState(false);
   const [lockedUntil, setLockedUntil] = useState(null);
   const [remainingTime, setRemainingTime] = useState(0);
-  
+
   // Check account lock status when component mounts or username changes
   useEffect(() => {
     if (mode === "login" && formData.username.trim()) {
       checkAccountLock(formData.username);
     }
   }, [mode, formData.username]);
-  
+
   // Manage countdown timer for locked accounts
   useEffect(() => {
     let timer;
     if (isAccountLocked && remainingTime > 0) {
       timer = setInterval(() => {
-        setRemainingTime(prev => {
+        setRemainingTime((prev) => {
           if (prev <= 1) {
             clearInterval(timer);
             setIsAccountLocked(false);
-            localStorage.removeItem('accountLock');
+            localStorage.removeItem("accountLock");
             return 0;
           }
           return prev - 1;
         });
       }, 1000);
     }
-    
+
     return () => {
       if (timer) clearInterval(timer);
     };
@@ -72,21 +72,21 @@ const Auth = ({
       [name]: value,
     }));
   };
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validate form before submission
     const validationError = validateForm();
     if (validationError) {
       setError(validationError);
       return;
     }
-    
+
     try {
       setIsLoading(true);
       setError("");
-      
+
       if (mode === "login") {
         await handleLogin();
       } else {
@@ -99,14 +99,14 @@ const Auth = ({
       setIsLoading(false);
     }
   };
-  
+
   // Form validation
   const validateForm = () => {
     if (mode === "login") {
       if (!formData.username.trim() || !formData.password.trim()) {
         return "All fields are required";
       }
-      
+
       if (isAccountLocked) {
         return `Account is locked. Try again in ${remainingTime} seconds.`;
       }
@@ -129,24 +129,21 @@ const Auth = ({
       if (formData.password !== formData.confirmPassword) {
         return "Passwords don't match";
       }
-      
+
       // Add more validation as needed (password strength, email format, etc.)
     }
-    
+
     return null; // No validation errors
   };
-  
+
   // Login handler
   const handleLogin = async () => {
-    const result = await UserAPI.login(
-      formData.username,
-      formData.password
-    );
+    const result = await UserAPI.login(formData.username, formData.password);
 
     if (result.success) {
       // Successful login - reset any failed attempts
       resetFailedAttempts(formData.username);
-      
+
       UserStorage.saveUser(
         {
           id: result.user.id,
@@ -163,17 +160,17 @@ const Auth = ({
       handleFailedLoginAttempt(formData.username);
     }
   };
-  
+
   // Registration handler
   const handleRegistration = async () => {
     // Check if username already exists
     const existingUser = await UserAPI.getByUsername(formData.username);
-    
+
     if (existingUser) {
       setError("Username already taken");
       return;
     }
-    
+
     // Create new user
     const newUser = await UserAPI.create({
       username: formData.username,
@@ -181,7 +178,7 @@ const Auth = ({
       website: formData.password, // Using website field to store password
       name: formData.name || formData.username,
     });
-    
+
     // Save new user to local storage
     UserStorage.saveUser(
       {
@@ -192,41 +189,41 @@ const Auth = ({
       },
       true // Always remember new registrations
     );
-    
+
     // Complete registration
     onSuccess();
   };
-  
+
   // Security related utility functions
   const checkAccountLock = (username) => {
-    const lockData = localStorage.getItem('accountLock');
-    
+    const lockData = localStorage.getItem("accountLock");
+
     if (!lockData) return;
-    
+
     try {
       const { username: lockedUser, until } = JSON.parse(lockData);
       const currentTime = Date.now();
-      
+
       if (username === lockedUser && until > currentTime) {
         setIsAccountLocked(true);
         setLockedUntil(until);
         setRemainingTime(Math.ceil((until - currentTime) / 1000));
       } else if (until < currentTime && username === lockedUser) {
         // Lock expired, clear it
-        localStorage.removeItem('accountLock');
+        localStorage.removeItem("accountLock");
         setIsAccountLocked(false);
       }
     } catch (e) {
       console.error("Error parsing account lock data:", e);
-      localStorage.removeItem('accountLock'); // Clear potentially corrupted data
+      localStorage.removeItem("accountLock"); // Clear potentially corrupted data
     }
   };
 
   const getFailedAttempts = (username) => {
     try {
-      const attemptsData = localStorage.getItem('loginAttempts');
+      const attemptsData = localStorage.getItem("loginAttempts");
       if (!attemptsData) return 0;
-      
+
       const attempts = JSON.parse(attemptsData);
       return attempts[username] || 0;
     } catch (e) {
@@ -234,45 +231,48 @@ const Auth = ({
       return 0;
     }
   };
-  
+
   const recordFailedAttempt = (username) => {
     try {
-      const attemptsData = localStorage.getItem('loginAttempts');
+      const attemptsData = localStorage.getItem("loginAttempts");
       const attempts = attemptsData ? JSON.parse(attemptsData) : {};
-      
+
       // Increment attempts for this username
       attempts[username] = (attempts[username] || 0) + 1;
-      localStorage.setItem('loginAttempts', JSON.stringify(attempts));
-      
+      localStorage.setItem("loginAttempts", JSON.stringify(attempts));
+
       return attempts[username];
     } catch (e) {
       console.error("Error recording failed attempt:", e);
       return 1;
     }
   };
-  
+
   const resetFailedAttempts = (username) => {
     try {
-      const attemptsData = localStorage.getItem('loginAttempts');
+      const attemptsData = localStorage.getItem("loginAttempts");
       if (attemptsData) {
         const attempts = JSON.parse(attemptsData);
         if (attempts[username]) {
           delete attempts[username];
-          localStorage.setItem('loginAttempts', JSON.stringify(attempts));
+          localStorage.setItem("loginAttempts", JSON.stringify(attempts));
         }
       }
     } catch (e) {
       console.error("Error resetting failed attempts:", e);
     }
   };
-  
+
   const lockAccount = (username, minutes) => {
     try {
-      const until = Date.now() + (minutes * 60 * 1000);
-      localStorage.setItem('accountLock', JSON.stringify({
-        username,
-        until
-      }));
+      const until = Date.now() + minutes * 60 * 1000;
+      localStorage.setItem(
+        "accountLock",
+        JSON.stringify({
+          username,
+          until,
+        })
+      );
       setIsAccountLocked(true);
       setLockedUntil(until);
       setRemainingTime(minutes * 60);
@@ -280,11 +280,11 @@ const Auth = ({
       console.error("Error locking account:", e);
     }
   };
-  
+
   const handleFailedLoginAttempt = (username) => {
     // Record the failed attempt and get the total count
     const attempts = recordFailedAttempt(username);
-    
+
     // Apply progressive security measures based on attempt count
     if (attempts >= 5) {
       // Lock account for 5 minutes after 5 failed attempts
@@ -292,7 +292,9 @@ const Auth = ({
       setError("Too many failed attempts. Account locked for 5 minutes.");
     } else if (attempts >= 3) {
       // Warning after 3 failed attempts
-      setError(`Warning: ${attempts} failed login attempts. Account will be locked after 5 attempts.`);
+      setError(
+        `Warning: ${attempts} failed login attempts. Account will be locked after 5 attempts.`
+      );
     } else {
       // Standard error for initial failures
       setError("Invalid username or password");
@@ -301,14 +303,18 @@ const Auth = ({
 
   // Pre-defined JSX elements for cleaner return statement
   const errorElement = error && (
-    <p className={`${styles.errorMessage} ${isAccountLocked ? styles.lockError : ''}`}>
+    <p
+      className={`${styles.errorMessage} ${
+        isAccountLocked ? styles.lockError : ""
+      }`}
+    >
       {error}
     </p>
   );
 
   // Form fields based on authentication mode
-  const formFields = mode === "login" 
-    ? (
+  const formFields =
+    mode === "login" ? (
       // Login form fields
       <>
         <div className={styles.formGroup}>
@@ -334,8 +340,7 @@ const Auth = ({
           />
         </div>
       </>
-    ) 
-    : (
+    ) : (
       // Registration form fields
       <>
         <div className={styles.formGroup}>
@@ -425,9 +430,9 @@ const Auth = ({
 
   // Submit button
   const submitButton = (
-    <button 
-      type="submit" 
-      className={styles.submitButton} 
+    <button
+      type="submit"
+      className={styles.submitButton}
       disabled={isLoading || isAccountLocked}
     >
       {getButtonText()}
