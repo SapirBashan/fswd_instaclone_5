@@ -66,24 +66,91 @@ export const clearWithPrefix = (prefix) => {
   }
 };
 
+// Cookie handling utilities
+const setCookie = (name, value, minutesToExpire = null) => {
+  let cookieString = `${name}=${encodeURIComponent(value)}; path=/`;
+  
+  if (minutesToExpire) {
+    const date = new Date();
+    date.setTime(date.getTime() + (minutesToExpire * 60 * 1000));
+    cookieString += `; expires=${date.toUTCString()}`;
+  }
+  
+  document.cookie = cookieString;
+};
+
+const getCookie = (name) => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return decodeURIComponent(parts.pop().split(';').shift());
+  return null;
+};
+
+const removeCookie = (name) => {
+  document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+};
+
 // User-specific utilities
 export const UserStorage = {
-  saveUser: (user, rememberMe = false) => {
-    // If rememberMe is true, store for 30 days, otherwise session only (no expiration)
+  saveUser: (userData, rememberMe = false) => {
+    // Store username in cookie
     const expiry = rememberMe ? 30 * 24 * 60 : null; // 30 days in minutes
-    setItem('user', user, expiry);
+    setCookie('current_user', userData.username, expiry);
+    
+    // Store user data in localStorage
+    const userKey = `user_${userData.username}`;
+    setItem(userKey, userData, expiry);
+  },
+  
+  getCurrentUsername: () => {
+    return getCookie('current_user');
   },
   
   getUser: () => {
-    return getItem('user');
+    const username = getCookie('current_user');
+    if (!username) return null;
+    
+    const userKey = `user_${username}`;
+    return getItem(userKey);
   },
   
   isLoggedIn: () => {
-    return hasItem('user');
+    const username = getCookie('current_user');
+    if (!username) return false;
+    
+    const userKey = `user_${username}`;
+    return hasItem(userKey);
   },
   
   logout: () => {
-    removeItem('user');
+    const username = getCookie('current_user');
+    if (username) {
+      // Set user data to expire in 20 minutes
+      const userKey = `user_${username}`;
+      const userData = getItem(userKey);
+      if (userData) {
+        setItem(userKey, userData, 20);
+      }
+      
+      // Remove the cookie immediately
+      removeCookie('current_user');
+    }
+  },
+  
+  // Get all stored users
+  getAllUsers: () => {
+    const users = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key?.startsWith('user_')) {
+        const username = key.replace('user_', '');
+        users.push({
+          username,
+          userData: getItem(key)
+        });
+      }
+    }
+    return users;
   }
 };
 
