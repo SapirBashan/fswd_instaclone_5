@@ -19,6 +19,8 @@ const HomePage = () => {
     try {
       const userIds = [...new Set(postList.map((post) => post.userId))];
       const userDetails = { ...users };
+      console.log("User IDs to fetch:", userIds);
+      console.log("Current user details:", userDetails);
       let hasNewUsers = false;
 
       for (const userId of userIds) {
