@@ -48,7 +48,7 @@ const AlbumPage = ({ userId = 1 }) => {
             if (selectedAlbum) {
                 try {
                     setLoading(true);
-                    const photoData = await PhotoAPI.getByAlbum(selectedAlbum.id);
+                    const photoData = await PhotoAPI.getByAlbum(selectedAlbum.id , {page, limit: PHOTOS_PER_PAGE});
                     const startIndex = (page - 1) * PHOTOS_PER_PAGE;
                     const endIndex = startIndex + PHOTOS_PER_PAGE;
                     const paginatedPhotos = photoData.slice(startIndex, endIndex);

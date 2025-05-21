@@ -193,12 +193,12 @@ export const PostAPI = {
         page = 1,
         limit = 10,
         excludeUserId = null,
-        random = false
+        random = false,
       } = options;
-      
+
       // Start with base query parameters
-      let queryParams = '';
-      
+      let queryParams = "";
+
       // Add user exclusion if needed
       if (excludeUserId) {
         queryParams += `userId_ne=${excludeUserId}&`;
@@ -214,17 +214,17 @@ export const PostAPI = {
         // Fetch a larger set, shuffle, then return the requested page
         queryParams += `_limit=100`; // Fetch more for better randomization
         const { data } = await apiRequest(`posts?${queryParams}`);
-        
+
         // Shuffle the posts (Fisher-Yates algorithm)
         for (let i = data.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [data[i], data[j]] = [data[j], data[i]];
         }
-        
+
         // Calculate the start and end index for the requested page
         const start = (page - 1) * limit;
         const end = Math.min(start + limit, data.length);
-        
+
         // Return the slice corresponding to the requested page
         return data.slice(start, end);
       }
@@ -333,9 +333,18 @@ export const PhotoAPI = {
     return data;
   },
 
-  // Get photos by album ID
-  getByAlbum: async (albumId) => {
-    const { data } = await apiRequest(`photos?albumId=${albumId}`);
+  // Get photos by album ID with pagination
+  getByAlbum: async (albumId, options = {}) => {
+    const { page = 1, limit = 10 } = options;
+
+    let queryString = `photos?albumId=${albumId}`;
+
+    // Add pagination if page and limit are provided
+    if (page && limit) {
+      queryString += `&_page=${page}&_limit=${limit}`;
+    }
+
+    const { data } = await apiRequest(queryString);
     return data;
   },
 
@@ -348,19 +357,19 @@ export const PhotoAPI = {
     return data;
   },
 
-      delete: async (photoId) => {
-        await apiRequest(`photos/${photoId}`, { method: "DELETE" });
-        return true;
-    },
+  delete: async (photoId) => {
+    await apiRequest(`photos/${photoId}`, { method: "DELETE" });
+    return true;
+  },
 
-    // Add update method
-    update: async (photoId, photoData) => {
-        const { data } = await apiRequest(`photos/${photoId}`, {
-            method: "PUT",
-            body: JSON.stringify(photoData)
-        });
-        return data;
-    }
+  // Add update method
+  update: async (photoId, photoData) => {
+    const { data } = await apiRequest(`photos/${photoId}`, {
+      method: "PUT",
+      body: JSON.stringify(photoData),
+    });
+    return data;
+  },
 };
 
 /**
