@@ -186,30 +186,50 @@ export const PostAPI = {
     return data;
   },
 
-  // Get random posts excluding user's own posts
-  getRandomPosts: async (excludeUserId = null, limit = 10) => {
+  // Get posts with pagination, optionally excluding a user's posts and randomizing
+  getPosts: async (options = {}) => {
     try {
-      // Fetch all posts or a larger set than needed
-      const { data } = await apiRequest(`posts?_limit=50`);
-
-      // Filter out user's posts if userId is provided
-      const filteredPosts = excludeUserId
-        ? data.filter((post) => post.userId !== excludeUserId)
-        : data;
-
-      // Shuffle the posts (Fisher-Yates algorithm)
-      for (let i = filteredPosts.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [filteredPosts[i], filteredPosts[j]] = [
-          filteredPosts[j],
-          filteredPosts[i],
-        ];
+      const {
+        page = 1,
+        limit = 10,
+        excludeUserId = null,
+        random = false
+      } = options;
+      
+      // Start with base query parameters
+      let queryParams = '';
+      
+      // Add user exclusion if needed
+      if (excludeUserId) {
+        queryParams += `userId_ne=${excludeUserId}&`;
       }
 
-      // Return the requested number of posts
-      return filteredPosts.slice(0, limit);
+      if (!random) {
+        // Normal pagination
+        queryParams += `_page=${page}&_limit=${limit}`;
+        const { data } = await apiRequest(`posts?${queryParams}`);
+        return data;
+      } else {
+        // For random posts with pagination:
+        // Fetch a larger set, shuffle, then return the requested page
+        queryParams += `_limit=100`; // Fetch more for better randomization
+        const { data } = await apiRequest(`posts?${queryParams}`);
+        
+        // Shuffle the posts (Fisher-Yates algorithm)
+        for (let i = data.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [data[i], data[j]] = [data[j], data[i]];
+        }
+        
+        // Calculate the start and end index for the requested page
+        const start = (page - 1) * limit;
+        const end = Math.min(start + limit, data.length);
+        
+        // Return the slice corresponding to the requested page
+        return data.slice(start, end);
+      }
     } catch (error) {
-      console.error("Error fetching random posts:", error);
+      console.error("Error fetching posts:", error);
       throw error;
     }
   },
@@ -238,6 +258,7 @@ export const PostAPI = {
     return true;
   },
 };
+
 /**
  * Comment-related API functions
  */

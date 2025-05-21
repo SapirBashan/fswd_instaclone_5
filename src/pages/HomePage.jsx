@@ -57,15 +57,18 @@ const HomePage = () => {
       const currentUserId = currentUser ? currentUser.id : null;
 
       // Get random posts from other users
-      const randomPosts = await PostAPI.getRandomPosts(
-        currentUserId,
-        postsPerPage
-      );
-      setPosts(randomPosts);
-      setHasMore(randomPosts.length === postsPerPage);
+      const Posts = await PostAPI.getPosts({
+        page,
+        limit: postsPerPage,
+        excludeUserId: currentUserId,
+      });
+
+
+      setPosts(Posts);
+      setHasMore(Posts.length === postsPerPage);
 
       // Fetch user details for each post
-      await fetchUserDetails(randomPosts);
+      await fetchUserDetails(Posts);
     } catch (err) {
       console.error("Error fetching posts:", err);
       setError("Failed to load feed. Please try again later.");
@@ -87,10 +90,12 @@ const HomePage = () => {
       const currentUserId = currentUser ? currentUser.id : null;
 
       // Get more random posts
-      const morePosts = await PostAPI.getRandomPosts(
-        currentUserId,
-        postsPerPage
-      );
+      const morePosts = await PostAPI.getPosts({
+        page: nextPage,
+        limit: postsPerPage,
+        excludeUserId: currentUserId,
+      });
+
 
       // Filter out any duplicates (might happen with random posts)
       const newPosts = morePosts.filter(
