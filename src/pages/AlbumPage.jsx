@@ -1,257 +1,295 @@
 import React, { useEffect, useState, useRef } from "react";
 import { AlbumAPI, PhotoAPI } from "../utils/ServerDB";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { UserStorage } from "../utils/LocalStorage";
 import style from "./AlbumPage.module.css";
 
-const AlbumPage = ({ userId = 1 }) => {
-    const [albums, setAlbums] = useState([]);
-    const [search, setSearch] = useState("");
-    const [selectedAlbum, setSelectedAlbum] = useState(null);
-    const [photos, setPhotos] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const [newAlbumTitle, setNewAlbumTitle] = useState("");
-    const [newPhotoUrl, setNewPhotoUrl] = useState("");
-    const [editingPhoto, setEditingPhoto] = useState(null);
-    const [page, setPage] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
-    const PHOTOS_PER_PAGE = 6;
+const AlbumPage = () => {
+  // Router hooks
+  const navigate = useNavigate();
+  const { albumId } = useParams();
+  const location = useLocation();
+  
+  // Get current user ID from storage
+  const userId = UserStorage.getUser()?.id || 1;
+  
+  // Core states
+  const [albums, setAlbums] = useState([]);
+  const [selectedAlbum, setSelectedAlbum] = useState(null);
+  const [photos, setPhotos] = useState([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
+  
+  // Input states
+  const [search, setSearch] = useState("");
+  const [newAlbumTitle, setNewAlbumTitle] = useState("");
+  const [newPhotoUrl, setNewPhotoUrl] = useState("");
+  const [editingPhoto, setEditingPhoto] = useState(null);
+  const [error, setError] = useState(null);
+  
+  // Refs
+  const photosContainerRef = useRef(null);
+  
+  // Constants
+  const PHOTOS_PER_PAGE = 10;
 
-    const lastPhotoRef = useRef(null);
+  // Load albums on component mount
+  useEffect(() => {
+    loadAlbums();
+  }, [userId, search]);
+  
+  // Handle album selection from URL
+  useEffect(() => {
+    if (albumId && albums.length > 0) {
+      const albumIdParts = albumId.split('-');
+      const id = parseInt(albumIdParts[0]);
+      const album = albums.find(a => a.id === id);
+      if (album) setSelectedAlbum(album);
+    }
+  }, [albumId, albums]);
 
+  // Load photos when album changes
+  useEffect(() => {
+    if (selectedAlbum) {
+      loadPhotos(1, true);
+      if (!location.pathname.includes(`/albums/${selectedAlbum.id}-`)) {
+        navigate(`/albums/${selectedAlbum.id}-${encodeURIComponent(selectedAlbum.title.replace(/\s+/g, '-'))}`);
+      }
+    }
+  }, [selectedAlbum]);
 
+  // Load more photos when page changes
+  useEffect(() => {
+    if (selectedAlbum && page > 1) {
+      loadPhotos(page, false);
+    }
+  }, [page]);
 
-    useEffect(() => {
+  const loadAlbums = async () => {
+    try {
+      setLoading(true);
+      const albumData = await AlbumAPI.getByUser(userId);
+      setAlbums(search
+        ? albumData.filter(album =>
+            album.title.toLowerCase().includes(search.toLowerCase()) ||
+            album.id.toString().includes(search)
+          )
+        : albumData);
+    } catch (err) {
+      setError("Failed to load albums");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadPhotos = async (pageNum, reset) => {
+    if (!selectedAlbum) return;
+    
+    try {
+      setLoading(true);
+      const photoData = await PhotoAPI.getByAlbum(selectedAlbum.id, {
+        page: pageNum,
+        limit: PHOTOS_PER_PAGE
+      });
+      
+      setPhotos(prev => reset ? photoData : [...prev, ...photoData]);
+      setHasMore(photoData.length === PHOTOS_PER_PAGE);
+      setPage(pageNum);
+    } catch (err) {
+      setError("Failed to load photos");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateAlbum = async (e) => {
+    e.preventDefault();
+    if (!newAlbumTitle.trim()) return;
+    
+    try {
+      const album = await AlbumAPI.create({ userId, title: newAlbumTitle });
+      setAlbums(prev => [...prev, album]);
+      setNewAlbumTitle("");
+    } catch (err) {
+      setError("Failed to create album");
+    }
+  };
+
+  const handlePhotoAction = async (action, photoData = null, photoId = null) => {
+    try {
+      switch (action) {
+        case 'add':
+          const newPhoto = await PhotoAPI.create({
+            albumId: selectedAlbum.id,
+            title: "New Photo",
+            url: newPhotoUrl,
+            thumbnailUrl: newPhotoUrl
+          });
+          setPhotos(prev => [newPhoto, ...prev]);
+          setNewPhotoUrl("");
+          break;
+          
+        case 'update':
+          const updated = await PhotoAPI.update(editingPhoto.id, {
+            ...editingPhoto,
+            url: newPhotoUrl,
+            thumbnailUrl: newPhotoUrl
+          });
+          setPhotos(prev => prev.map(p => p.id === updated.id ? updated : p));
+          setEditingPhoto(null);
+          setNewPhotoUrl("");
+          break;
+          
+        case 'delete':
+          await PhotoAPI.delete(photoId);
+          setPhotos(prev => prev.filter(p => p.id !== photoId));
+          break;
+      }
+    } catch (err) {
+      setError(`Failed to ${action} photo`);
+    }
+  };
+
+  // Component views
+  const AlbumListView = (
+    <>
+      <h2>My Albums</h2>
+      <div className={style.albumControls}>
+        <form onSubmit={handleCreateAlbum} className={style.albumInput}>
+          <input
+            type="text"
+            placeholder="New album title"
+            value={newAlbumTitle}
+            onChange={(e) => setNewAlbumTitle(e.target.value)}
+          />
+          <button type="submit">Create Album</button>
+        </form>
         
-        const loadAlbums = async () => {
-            try {
-                setLoading(true);
-                const albumData = await AlbumAPI.getByUser(userId);
-                const filtered = search
-                    ? albumData.filter(album =>
-                        album.title.toLowerCase().includes(search.toLowerCase()) ||
-                        album.id.toString().includes(search)
-                    )
-                    : albumData;
-                setAlbums(filtered);
-            } catch (err) {
-                setError("Failed to load albums");
-                console.error("Error loading albums:", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        loadAlbums();
-    }, [userId, search]);
+        <input
+          type="text"
+          placeholder="Search by id or title"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className={style.searchInput}
+        />
+      </div>
+      
+      <ul className={style.albumList}>
+        {albums.map((album) => (
+          <li key={album.id}>
+            <button
+              className={style.albumButton}
+              onClick={() => setSelectedAlbum(album)}
+            >
+              {album.id} - {album.title}
+            </button>
+          </li>
+        ))}
+      </ul>
+      
+      {albums.length === 0 && !loading && <p>No albums found</p>}
+    </>
+  );
 
-    useEffect(() => {
-        const loadPhotos = async () => {
-            if (selectedAlbum) {
-                try {
-                    setLoading(true);
-                    const photoData = await PhotoAPI.getByAlbum(selectedAlbum.id , {page, limit: PHOTOS_PER_PAGE});
-                    const startIndex = (page - 1) * PHOTOS_PER_PAGE;
-                    const endIndex = startIndex + PHOTOS_PER_PAGE;
-                    const paginatedPhotos = photoData.slice(startIndex, endIndex);
-
-                    if (page === 1) {
-                        setPhotos(paginatedPhotos);
-                    } else {
-                        setPhotos(prev => [...prev, ...paginatedPhotos]);
-                    }
-
-                    setHasMore(endIndex < photoData.length);
-                } catch (err) {
-                    setError("Failed to load photos");
-                    console.error("Error loading photos:", err);
-                } finally {
-                    setLoading(false);
-                }
-            }
-        };
-        loadPhotos();
-    }, [selectedAlbum, page]);
-
-    const loadMorePhotos = () => setPage(prev => prev + 1);
-
-    const handleSearch = (e) => setSearch(e.target.value);
-
-    const handleAlbumClick = (album) => {
-        setSelectedAlbum(album);
-        setEditingPhoto(null);
-    };
-
-    const handleCreateAlbum = async (e) => {
-        e.preventDefault();
-        if (!newAlbumTitle.trim()) return;
-        try {
-            const album = await AlbumAPI.create({
-                userId,
-                title: newAlbumTitle
-            });
-            setAlbums(prev => [...prev, album]);
-            setNewAlbumTitle("");
-        } catch (err) {
-            setError("Failed to create album");
-            console.error("Error creating album:", err);
-        }
-    };
-
-    const handleAddPhoto = async (e) => {
+  const PhotoFormView = (
+    <form
+      onSubmit={(e) => {
         e.preventDefault();
         if (!newPhotoUrl.trim()) return;
-        try {
-            const photo = await PhotoAPI.create({
-                albumId: selectedAlbum.id,
-                title: "New Photo",
-                url: newPhotoUrl,
-                thumbnailUrl: newPhotoUrl
-            });
-            setPhotos(prev => [photo, ...prev]);
-            setNewPhotoUrl("");
-        } catch (err) {
-            setError("Failed to add photo");
-            console.error("Error adding photo:", err);
+        
+        if (editingPhoto) {
+          handlePhotoAction('update');
+        } else {
+          handlePhotoAction('add');
         }
-    };
-
-    const handleDeletePhoto = async (photoId) => {
-        try {
-            await PhotoAPI.delete(photoId);
-            setPhotos(prev => prev.filter(p => p.id !== photoId));
-        } catch (err) {
-            setError("Failed to delete photo");
-            console.error("Error deleting photo:", err);
-        }
-    };
-
-    const handleEditPhoto = (photo) => {
-        setEditingPhoto(photo);
-        setNewPhotoUrl(photo.url);
-    };
-
-    const handleUpdatePhoto = async (e) => {
-        e.preventDefault();
-        if (!newPhotoUrl.trim()) return;
-        try {
-            const updated = await PhotoAPI.update(editingPhoto.id, {
-                ...editingPhoto,
-                url: newPhotoUrl,
-                thumbnailUrl: newPhotoUrl
-            });
-            setPhotos(prev => prev.map(p => p.id === updated.id ? updated : p));
+      }}
+      className={style.photoInput}
+    >
+      <input
+        type="text"
+        placeholder="Photo URL"
+        value={newPhotoUrl}
+        onChange={(e) => setNewPhotoUrl(e.target.value)}
+      />
+      <button type="submit">
+        {editingPhoto ? "Update Photo" : "Add Photo"}
+      </button>
+      {editingPhoto && (
+        <button
+          type="button"
+          onClick={() => {
             setEditingPhoto(null);
             setNewPhotoUrl("");
-        } catch (err) {
-            setError("Failed to update photo");
-            console.error("Error updating photo:", err);
-        }
-    };
+          }}
+          className={style.cancelButton}
+        >
+          Cancel
+        </button>
+      )}
+    </form>
+  );
 
-    const handleBackToAlbums = () => {
-        setSelectedAlbum(null);
-        setPhotos([]);
-        setEditingPhoto(null);
-        setError(null);
-        setPage(1);
-        setHasMore(true);
-    };
-
-    if (loading) {
-        return <div>Loading...</div>;
-    }
-
-    if (error) {
-        return (
-            <div>
-                <p className={style.error}>{error}</p>
-                <button onClick={() => setError(null)}>Dismiss</button>
-            </div>
-        );
-    }
-
-    return (
-        <div className={style.container}>
-            {!selectedAlbum ? (
-                <>
-                    <h2>Albums</h2>
-                    <form onSubmit={handleCreateAlbum} className={style.albumInput}>
-                        <input
-                            type="text"
-                            placeholder="New album title"
-                            value={newAlbumTitle}
-                            onChange={(e) => setNewAlbumTitle(e.target.value)}
-                        />
-                        <button type="submit">Create Album</button>
-                    </form>
-                    <input
-                        type="text"
-                        placeholder="Search by id or title"
-                        value={search}
-                        onChange={handleSearch}
-                        className={style.searchInput}
-                    />
-                    <ul className={style.albumList}>
-                        {albums.map((album) => (
-                            <li key={album.id}>
-                                <button
-                                    className={style.albumButton}
-                                    onClick={() => handleAlbumClick(album)}
-                                >
-                                    {album.id} - {album.title}
-                                </button>
-                            </li>
-                        ))}
-                    </ul>
-                </>
-            ) : (
-                <>
-                    <button onClick={handleBackToAlbums}>Back to Albums</button>
-                    <h2>
-                        Album: {selectedAlbum.id} - {selectedAlbum.title}
-                    </h2>
-                    <form
-                        onSubmit={editingPhoto ? handleUpdatePhoto : handleAddPhoto}
-                        className={style.photoInput}
-                    >
-                        <input
-                            type="text"
-                            placeholder="Photo URL"
-                            value={newPhotoUrl}
-                            onChange={(e) => setNewPhotoUrl(e.target.value)}
-                        />
-                        <button type="submit">
-                            {editingPhoto ? "Update Photo" : "Add Photo"}
-                        </button>
-                        {editingPhoto && (
-                            <button
-                                type="button"
-                                onClick={() => setEditingPhoto(null)}
-                                className={style.cancelButton}
-                            >
-                                Cancel
-                            </button>
-                        )}
-                    </form>
-                    <div className={style.photoGrid}>
-                        {photos.map((photo) => (
-                            <div key={photo.id} className={style.photoCard}>
-                                <img src={photo.url} alt={photo.title} width={120} height={120} />
-                                <div>{photo.title}</div>
-                                <button onClick={() => handleEditPhoto(photo)}>Edit</button>
-                                <button onClick={() => handleDeletePhoto(photo.id)}>Delete</button>
-                            </div>
-                        ))}
-                    </div>
-                    {hasMore && !loading && (
-                        <button className={style.loadMoreButton} onClick={loadMorePhotos}>
-                            Load More Photos
-                        </button>
-                    )}
-                    {loading && <div>Loading more photos...</div>}
-                </>
-            )}
+  const PhotosGridView = (
+    <div 
+      className={style.photoGrid} 
+      ref={photosContainerRef}
+    >
+      {photos.map((photo) => (
+        <div key={photo.id} className={style.photoCard}>
+          <img src={photo.url} alt={photo.title} width={120} height={120} />
+          <div className={style.photoTitle}>{photo.title}</div>
+          <div className={style.photoControls}>
+            <button onClick={() => {
+              setEditingPhoto(photo);
+              setNewPhotoUrl(photo.url);
+            }}>Edit</button>
+            <button onClick={() => handlePhotoAction('delete', null, photo.id)}>Delete</button>
+          </div>
         </div>
-    );
+      ))}
+      
+      {hasMore && (
+        <button 
+          className={style.loadMoreButton}
+          onClick={() => setPage(p => p + 1)}
+          disabled={loading}
+        >
+          {loading ? "Loading..." : "Load More Photos"}
+        </button>
+      )}
+    </div>
+  );
+
+  const AlbumDetailView = selectedAlbum && (
+    <>
+      <div className={style.albumHeader}>
+        <button onClick={() => {
+          setSelectedAlbum(null);
+          navigate('/albums');
+        }}>Back to Albums</button>
+        <h2>Album: {selectedAlbum.id} - {selectedAlbum.title}</h2>
+      </div>
+      
+      {PhotoFormView}
+      {PhotosGridView}
+    </>
+  );
+
+  return (
+    <div className={style.container}>
+      {error && (
+        <div className={style.errorMessage}>
+          <p>{error}</p>
+          <button onClick={() => setError(null)}>Dismiss</button>
+        </div>
+      )}
+      
+      {loading && <div className={style.loadingIndicator}>Loading...</div>}
+      
+      {selectedAlbum ? AlbumDetailView : AlbumListView}
+    </div>
+  );
 };
 
 export default AlbumPage;

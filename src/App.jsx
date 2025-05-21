@@ -87,7 +87,7 @@ function App() {
       />
 
       <Route
-        path="/albums"
+        path="/albums/:albumId?"
         element={
           <ProtectedRoute>
             <AlbumPage />
