@@ -7,6 +7,7 @@ import RegisterPage from "./pages/RegisterPage";
 import HomePage from "./pages/HomePage";
 import MyPostsPage from "./pages/MyPostsPage";
 import { UserStorage } from "./utils/LocalStorage";
+import AlbumPage from "./pages/AlbumPage";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -51,7 +52,7 @@ function App() {
         path="/login"
         element={
           isAuthenticated ? (
-            <Navigate to="/" />
+            <Navigate to="/home" />
           ) : (
             <LoginPage onLoginSuccess={handleLogin} />
           )
@@ -61,14 +62,14 @@ function App() {
         path="/register"
         element={
           isAuthenticated ? (
-            <Navigate to="/" />
+            <Navigate to="/home" />
           ) : (
             <RegisterPage onRegisterSuccess={handleLogin} />
           )
         }
       />
       <Route
-        path="/"
+        path="/home"
         element={
           <ProtectedRoute>
             <HomePage />
@@ -89,13 +90,23 @@ function App() {
         path="/albums"
         element={
           <ProtectedRoute>
-            <div>Albums Page</div>
+            <AlbumPage />
           </ProtectedRoute>
         }
       />
+
+      <Route
+        path="/TODO"
+        element={
+          <ProtectedRoute>
+            <div>TODO Page</div>
+          </ProtectedRoute>
+        }
+      />
+
       <Route
         path="*"
-        element={<Navigate to={isAuthenticated ? "/" : "/login"} />}
+        element={<Navigate to={isAuthenticated ? "/home" : "/login"} />}
       />
     </Routes>
   );

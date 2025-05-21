@@ -44,6 +44,15 @@ const SideNav = ({ onLogout }) => {
         </Link>
 
         <Link
+          to="/TODO"
+          className={`${style.navItem} ${
+            location.pathname === "/TODO" ? style.active : ""
+          }`}
+        >
+          <span className={style.navIcon}>✅</span> TODO
+        </Link>
+
+        <Link
           to="/my-posts"
           className={`${style.navItem} ${
             location.pathname === "/my-posts" ? style.active : ""
