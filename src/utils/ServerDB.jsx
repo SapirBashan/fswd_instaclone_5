@@ -326,6 +326,20 @@ export const PhotoAPI = {
     });
     return data;
   },
+
+      delete: async (photoId) => {
+        await apiRequest(`photos/${photoId}`, { method: "DELETE" });
+        return true;
+    },
+
+    // Add update method
+    update: async (photoId, photoData) => {
+        const { data } = await apiRequest(`photos/${photoId}`, {
+            method: "PUT",
+            body: JSON.stringify(photoData)
+        });
+        return data;
+    }
 };
 
 /**

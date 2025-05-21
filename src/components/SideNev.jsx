@@ -26,9 +26,9 @@ const SideNav = ({ onLogout }) => {
 
       <div className={style.navLinks}>
         <Link
-          to="/"
+          to="/home"
           className={`${style.navItem} ${
-            location.pathname === "/" ? style.active : ""
+            location.pathname === "/home" ? style.active : ""
           }`}
         >
           <span className={style.navIcon}>🏠</span> Home
@@ -41,6 +41,15 @@ const SideNav = ({ onLogout }) => {
           }`}
         >
           <span className={style.navIcon}>🖼️</span> Albums
+        </Link>
+
+        <Link
+          to="/TODO"
+          className={`${style.navItem} ${
+            location.pathname === "/TODO" ? style.active : ""
+          }`}
+        >
+          <span className={style.navIcon}>✅</span> TODO
         </Link>
 
         <Link
