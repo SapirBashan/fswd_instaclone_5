@@ -372,6 +372,39 @@ export const PhotoAPI = {
   },
 };
 
+// First, add TodoAPI to ServerDB.jsx
+export const TodoAPI = {
+  // Get all todos for a user
+  getByUser: async (userId) => {
+    const { data } = await apiRequest(`todos?userId=${userId}`);
+    return data;
+  },
+
+  // Create new todo
+  create: async (todoData) => {
+    const { data } = await apiRequest("todos", {
+      method: "POST",
+      body: JSON.stringify(todoData),
+    });
+    return data;
+  },
+
+  // Update todo
+  update: async (id, todoData) => {
+    const { data } = await apiRequest(`todos/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(todoData),
+    });
+    return data;
+  },
+
+  // Delete todo
+  delete: async (id) => {
+    await apiRequest(`todos/${id}`, { method: "DELETE" });
+    return true;
+  },
+};
+
 /**
  * Helper function for adding pagination
  * @param endpoint - The API endpoint

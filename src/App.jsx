@@ -8,6 +8,7 @@ import HomePage from "./pages/HomePage";
 import MyPostsPage from "./pages/MyPostsPage";
 import { UserStorage } from "./utils/LocalStorage";
 import AlbumPage from "./pages/AlbumPage";
+import TodoPage from "./pages/TodoPage";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -99,7 +100,8 @@ function App() {
         path="/TODO"
         element={
           <ProtectedRoute>
-            <div>TODO Page</div>
+            <TodoPage/>
+            {/* <div>TodoPage</div> */}
           </ProtectedRoute>
         }
       />
