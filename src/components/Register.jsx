@@ -5,14 +5,14 @@ import { UserStorage } from "../utils/LocalStorage";
 
 const Register = ({ onRegisterSuccess }) => {
   const navigate = useNavigate();
-  
+
   // State
   const [formData, setFormData] = useState({
     username: "",
     email: "",
     password: "",
     confirmPassword: "",
-    name: ""
+    name: "",
   });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -20,12 +20,14 @@ const Register = ({ onRegisterSuccess }) => {
   // Form handlers
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const validateForm = () => {
     const requiredFields = ["username", "email", "password", "confirmPassword"];
-    const missingFields = requiredFields.filter(field => !formData[field].trim());
+    const missingFields = requiredFields.filter(
+      (field) => !formData[field].trim()
+    );
 
     if (missingFields.length > 0) {
       return "All fields except Name are required";
@@ -49,69 +51,84 @@ const Register = ({ onRegisterSuccess }) => {
     return null; // No validation errors
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  // Validate form
-  const validationError = validateForm();
-  if (validationError) {
-    setError(validationError);
-    return;
-  }
-
-  try {
-    setIsLoading(true);
-    setError("");
-
-    // Check if username exists (fix method call)
-    const existingUser = await UserAPI.checkExists(formData.username);
-    if (existingUser) {
-      setError("Username already taken");
-      setIsLoading(false);
+    // Validate form
+    const validationError = validateForm();
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
-    // Create basic user 
-    const newUser = await UserAPI.create({
-      username: formData.username,
-      email: formData.email,
-      website: formData.password, // Using website field to store password
-      name: formData.name || formData.username,
-    });
+    try {
+      setIsLoading(true);
+      setError("");
 
-    // Save user to localStorage
-    UserStorage.saveUser(
-      {
-        id: newUser.id,
-        username: newUser.username,
-        name: newUser.name,
-        email: newUser.email,
-      },
-      true
-    );
+      // Check if username exists
+      const existingUser = await UserAPI.checkExists(formData.username);
+      if (existingUser) {
+        setError("Username already taken");
+        setIsLoading(false);
+        return;
+      }
 
-    // Important: Call the success handler first to update authentication state
-    onRegisterSuccess();
-    
-    // Then navigate to profile completion (add a small delay to ensure state update)
-    setTimeout(() => {
-      navigate(`/complete-profile/${newUser.id}`);
-    }, 100);
-    
-  } catch (error) {
-    console.error("Registration error:", error);
-    setError("Error creating account. Please try again.");
-  } finally {
-    setIsLoading(false);
-  }
-};
+      // Create user with full structure but minimal data
+      const newUser = await UserAPI.create({
+        username: formData.username,
+        email: formData.email,
+        website: formData.password, // Store password in website field (temporary)
+        name: formData.name || formData.username,
+        address: {
+          street: "",
+          suite: "",
+          city: "",
+          zipcode: "",
+          geo: {
+            lat: "",
+            lng: "",
+          },
+        },
+        phone: "",
+        company: {
+          name: "",
+          catchPhrase: "",
+          bs: "",
+        },
+      });
+
+      // Save user to localStorage
+      UserStorage.saveUser(
+        {
+          id: newUser.id,
+          username: newUser.username,
+          name: newUser.name,
+          email: newUser.email,
+        },
+        true
+      );
+
+      // Call the success handler first to update authentication state
+      onRegisterSuccess();
+
+      // Then navigate to profile completion
+      setTimeout(() => {
+        navigate(`/complete-profile/${newUser.id}`);
+      }, 100);
+    } catch (error) {
+      console.error("Registration error:", error);
+      setError("Error creating account. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return {
     formData,
     error,
     isLoading,
     handleChange,
-    handleSubmit
+    handleSubmit,
   };
 };
 

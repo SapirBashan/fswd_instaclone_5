@@ -85,23 +85,6 @@ export const UserAPI = {
     return true;
   },
 
-  // // Login (validate credentials)
-  // login: async (username, password) => {
-  //   try {
-  //     // In json-server, we need to get the user and check manually
-  //     const { data } = await apiRequest(`users?username=${username}`);
-  //     const user = data.find(
-  //       (user) => user.username === username && user.website === password
-  //     );
-
-  //     return user
-  //       ? { success: true, user }
-  //       : { success: false, message: "Invalid credentials" };
-  //   } catch (error) {
-  //     return { success: false, message: "Login failed" };
-  //   }
-  // },
-
   // Login (validate credentials)
   login: async (username, password) => {
     try {

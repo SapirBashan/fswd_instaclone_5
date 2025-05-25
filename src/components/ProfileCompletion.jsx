@@ -6,7 +6,7 @@ import { UserStorage } from "../utils/LocalStorage";
 const ProfileCompletion = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
-  
+
   // State
   const [user, setUser] = useState(null);
   const [formData, setFormData] = useState({
@@ -15,7 +15,7 @@ const ProfileCompletion = () => {
     company: {
       name: "",
       catchPhrase: "",
-      bs: ""
+      bs: "",
     },
     address: {
       street: "",
@@ -24,21 +24,21 @@ const ProfileCompletion = () => {
       zipcode: "",
       geo: {
         lat: "",
-        lng: ""
-      }
-    }
+        lng: "",
+      },
+    },
   });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [activeSection, setActiveSection] = useState("personal"); // 'personal', 'address', 'company'
-  
+
   // Load user data
   useEffect(() => {
     const loadUserData = async () => {
       try {
         const userData = await UserAPI.getById(userId);
         setUser(userData);
-        
+
         // Pre-fill any existing data
         setFormData({
           phone: userData.phone || "",
@@ -46,7 +46,7 @@ const ProfileCompletion = () => {
           company: {
             name: userData.company?.name || "",
             catchPhrase: userData.company?.catchPhrase || "",
-            bs: userData.company?.bs || ""
+            bs: userData.company?.bs || "",
           },
           address: {
             street: userData.address?.street || "",
@@ -55,11 +55,11 @@ const ProfileCompletion = () => {
             zipcode: userData.address?.zipcode || "",
             geo: {
               lat: userData.address?.geo?.lat || "",
-              lng: userData.address?.geo?.lng || ""
-            }
-          }
+              lng: userData.address?.geo?.lng || "",
+            },
+          },
         });
-        
+
         setIsLoading(false);
       } catch (err) {
         console.error("Error loading user data:", err);
@@ -67,82 +67,88 @@ const ProfileCompletion = () => {
         setIsLoading(false);
       }
     };
-    
+
     loadUserData();
   }, [userId]);
-  
+
   // Change handlers
   const handlePersonalChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
-  
+
   const handleAddressChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      address: { ...prev.address, [name]: value }
+      address: { ...prev.address, [name]: value },
     }));
   };
-  
+
   const handleGeoChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       address: {
         ...prev.address,
-        geo: { ...prev.address.geo, [name]: value }
-      }
+        geo: { ...prev.address.geo, [name]: value },
+      },
     }));
   };
-  
+
   // Add the missing handleCompanyChange function
   const handleCompanyChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      company: { ...prev.company, [name]: value }
+      company: { ...prev.company, [name]: value },
     }));
   };
-  
+
   // Form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
+      // Save the current password/website value
+      const password = user.website;
+
       // Update user data
       const updatedUser = await UserAPI.update(userId, {
         ...user,
         phone: formData.phone,
-        website: user.website, // Keep the password intact
+        website: formData.website || password, // Use new website or keep password if empty
         company: formData.company,
-        address: formData.address
+        address: formData.address,
       });
-      
+
       // Update in local storage
       const currentUser = UserStorage.getUser();
-      UserStorage.saveUser({
-        ...currentUser,
-        phone: updatedUser.phone,
-        company: updatedUser.company,
-        address: updatedUser.address
-      }, true);
-      
-      // Navigate to home using React Router
-      navigate('/home');
+      UserStorage.saveUser(
+        {
+          ...currentUser,
+          phone: updatedUser.phone,
+          company: updatedUser.company,
+          address: updatedUser.address,
+        },
+        true
+      );
+
+      // Navigate to home
+      navigate("/home");
     } catch (err) {
       console.error("Error updating profile:", err);
       setError("Failed to update profile");
       setIsLoading(false);
     }
   };
-  
+
   // Skip profile completion
   const handleSkip = () => {
-    navigate('/home');
+    navigate("/home");
   };
-  
+
   return {
     user,
     formData,
@@ -155,7 +161,7 @@ const ProfileCompletion = () => {
     handleGeoChange,
     handleCompanyChange,
     handleSubmit,
-    handleSkip
+    handleSkip,
   };
 };
 
