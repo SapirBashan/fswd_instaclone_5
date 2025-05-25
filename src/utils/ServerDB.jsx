@@ -372,7 +372,6 @@ export const PhotoAPI = {
   },
 };
 
-// First, add TodoAPI to ServerDB.jsx
 export const TodoAPI = {
   // Get all todos for a user
   getByUser: async (userId) => {
@@ -380,11 +379,24 @@ export const TodoAPI = {
     return data;
   },
 
+  // Get highest ID to generate next ID
+  getNextId: async () => {
+    const { data } = await apiRequest('todos');
+    const maxId = data.reduce((max, todo) => Math.max(max, todo.id || 0), 0);
+    return maxId + 1;
+  },
+
   // Create new todo
   create: async (todoData) => {
+    const nextId = await TodoAPI.getNextId();
+    const todoWithId = {
+      ...todoData,
+      id: nextId
+    };
+
     const { data } = await apiRequest("todos", {
       method: "POST",
-      body: JSON.stringify(todoData),
+      body: JSON.stringify(todoWithId),
     });
     return data;
   },
@@ -393,7 +405,10 @@ export const TodoAPI = {
   update: async (id, todoData) => {
     const { data } = await apiRequest(`todos/${id}`, {
       method: "PUT",
-      body: JSON.stringify(todoData),
+      body: JSON.stringify({
+        ...todoData,
+        id: Number(id) // Ensure ID remains a number
+      }),
     });
     return data;
   },
