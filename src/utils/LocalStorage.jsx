@@ -9,21 +9,21 @@ export const setItem = (key, value, expirationInMinutes) => {
     timestamp: expirationInMinutes ? Date.now() : null,
     expiry: expirationInMinutes ? expirationInMinutes * 60 * 1000 : null,
   };
-  
+
   localStorage.setItem(key, JSON.stringify(item));
 };
 
 // Get an item from localStorage, respecting expiration if present
 export const getItem = (key) => {
   const itemStr = localStorage.getItem(key);
-  
+
   if (!itemStr) {
     return null;
   }
-  
+
   try {
     const item = JSON.parse(itemStr);
-    
+
     // Check if item is expired
     if (item.expiry && item.timestamp) {
       const now = Date.now();
@@ -33,10 +33,10 @@ export const getItem = (key) => {
         return null;
       }
     }
-    
+
     return item.value;
   } catch (error) {
-    console.error('Error parsing localStorage item:', error);
+    console.error("Error parsing localStorage item:", error);
     return null;
   }
 };
@@ -69,20 +69,21 @@ export const clearWithPrefix = (prefix) => {
 // Cookie handling utilities
 const setCookie = (name, value, minutesToExpire = null) => {
   let cookieString = `${name}=${encodeURIComponent(value)}; path=/`;
-  
+
   if (minutesToExpire) {
     const date = new Date();
-    date.setTime(date.getTime() + (minutesToExpire * 60 * 1000));
+    date.setTime(date.getTime() + minutesToExpire * 60 * 1000);
     cookieString += `; expires=${date.toUTCString()}`;
   }
-  
+
   document.cookie = cookieString;
 };
 
 const getCookie = (name) => {
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return decodeURIComponent(parts.pop().split(';').shift());
+  if (parts.length === 2)
+    return decodeURIComponent(parts.pop().split(";").shift());
   return null;
 };
 
@@ -95,35 +96,35 @@ export const UserStorage = {
   saveUser: (userData, rememberMe = false) => {
     // Store username in cookie
     const expiry = rememberMe ? 30 * 24 * 60 : null; // 30 days in minutes
-    setCookie('current_user', userData.username, expiry);
-    
+    setCookie("current_user", userData.username, expiry);
+
     // Store user data in localStorage
     const userKey = `user_${userData.username}`;
     setItem(userKey, userData, expiry);
   },
-  
+
   getCurrentUsername: () => {
-    return getCookie('current_user');
+    return getCookie("current_user");
   },
-  
+
   getUser: () => {
-    const username = getCookie('current_user');
+    const username = getCookie("current_user");
     if (!username) return null;
-    
+
     const userKey = `user_${username}`;
     return getItem(userKey);
   },
-  
+
   isLoggedIn: () => {
-    const username = getCookie('current_user');
+    const username = getCookie("current_user");
     if (!username) return false;
-    
+
     const userKey = `user_${username}`;
     return hasItem(userKey);
   },
-  
+
   logout: () => {
-    const username = getCookie('current_user');
+    const username = getCookie("current_user");
     if (username) {
       // Set user data to expire in 20 minutes
       const userKey = `user_${username}`;
@@ -131,27 +132,27 @@ export const UserStorage = {
       if (userData) {
         setItem(userKey, userData, 20);
       }
-      
+
       // Remove the cookie immediately
-      removeCookie('current_user');
+      removeCookie("current_user");
     }
   },
-  
+
   // Get all stored users
   getAllUsers: () => {
     const users = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key?.startsWith('user_')) {
-        const username = key.replace('user_', '');
+      if (key?.startsWith("user_")) {
+        const username = key.replace("user_", "");
         users.push({
           username,
-          userData: getItem(key)
+          userData: getItem(key),
         });
       }
     }
     return users;
-  }
+  },
 };
 
 export default {
@@ -161,5 +162,5 @@ export default {
   hasItem,
   clearAll,
   clearWithPrefix,
-  UserStorage
+  UserStorage,
 };
