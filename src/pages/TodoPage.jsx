@@ -288,34 +288,34 @@ const TodoPage = () => {
             
             {editingTodo?.id === todo.id ? (
           <TextField
-  fullWidth
-  size="small"
-  value={editingTodo.title}
-  onChange={(e) =>
-    setEditingTodo({
-      ...editingTodo,
-      title: e.target.value,
-    })
-  }
-  onBlur={() => handleUpdateTodo(todo.id, editingTodo)}
-  autoFocus
-  variant="outlined"
-  sx={{
-    '& .MuiOutlinedInput-root': {
-      borderRadius: '6px',
-      paddingY: '0',
-      '& input': {
-        paddingY: '0.6rem',
-        paddingX: '1rem',
-        fontSize: '1rem',
-        lineHeight: 1.5,
-      },
-    },
-    '& .MuiOutlinedInput-notchedOutline': {
-      border: 'none',
-    },
-  }}
-/>
+            fullWidth
+            size="small"
+            value={editingTodo.title}
+            onChange={(e) =>
+              setEditingTodo({
+                ...editingTodo,
+                title: e.target.value,
+              })
+            }
+            onBlur={() => handleUpdateTodo(todo.id, editingTodo)}
+            autoFocus
+            variant="outlined"
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: '6px',
+                paddingY: '0',
+                '& input': {
+                  paddingY: '0.6rem',
+                  paddingX: '1rem',
+                  fontSize: '1rem',
+                  lineHeight: 1.5,
+                },
+              },
+              '& .MuiOutlinedInput-notchedOutline': {
+                border: 'none',
+              },
+            }}
+          />
 
             ) : (
               <ListItemText
