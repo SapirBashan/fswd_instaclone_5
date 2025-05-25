@@ -31,46 +31,96 @@ const Auth = ({
   const [rememberMe, setRememberMe] = useState(false);
 
   // Security-related state
-  const [isAccountLocked, setIsAccountLocked] = useState(false);
-  const [lockedUntil, setLockedUntil] = useState(null);
-  const [remainingTime, setRemainingTime] = useState(0);
+  const [lockedAccounts, setLockedAccounts] = useState({});
+  const [remainingTimes, setRemainingTimes] = useState({});
 
-  // Check account lock status when component mounts or username changes
+  // Check all account locks when component mounts
   useEffect(() => {
-    if (mode === "login" && formData.username.trim()) {
-      checkAccountLock(formData.username);
-    }
-  }, [mode, formData.username]);
+    checkAccountLocks();
+  }, []);
+
+  // Check if the current username is locked
+  const isCurrentUserLocked = () => {
+    return !!lockedAccounts[formData.username];
+  };
+
+  // Get the remaining time for the current user
+  const getCurrentUserRemainingTime = () => {
+    return remainingTimes[formData.username] || 0;
+  };
 
   // Manage countdown timer for locked accounts
   useEffect(() => {
     let timer;
-    if (isAccountLocked && remainingTime > 0) {
+    const lockedUsernames = Object.keys(lockedAccounts);
+
+    if (lockedUsernames.length > 0) {
       timer = setInterval(() => {
-        setRemainingTime((prev) => {
-          if (prev <= 1) {
-            clearInterval(timer);
-            setIsAccountLocked(false);
-            localStorage.removeItem("accountLock");
-            return 0;
+        const now = Date.now();
+        const updatedLockedAccounts = { ...lockedAccounts };
+        const updatedRemainingTimes = { ...remainingTimes };
+
+        let needsUpdate = false;
+
+        lockedUsernames.forEach((username) => {
+          if (lockedAccounts[username] > now) {
+            // Account still locked
+            updatedRemainingTimes[username] = Math.ceil(
+              (lockedAccounts[username] - now) / 1000
+            );
+            needsUpdate = true;
+          } else {
+            // Lock expired
+            delete updatedLockedAccounts[username];
+            delete updatedRemainingTimes[username];
+            needsUpdate = true;
+
+            // If this was the current username, clear the error
+            if (username === formData.username) {
+              setError("");
+            }
           }
-          return prev - 1;
         });
+
+        if (needsUpdate) {
+          setLockedAccounts(updatedLockedAccounts);
+          setRemainingTimes(updatedRemainingTimes);
+
+          // Update localStorage to match our state
+          if (Object.keys(updatedLockedAccounts).length > 0) {
+            localStorage.setItem(
+              "accountLocks",
+              JSON.stringify(updatedLockedAccounts)
+            );
+          } else {
+            localStorage.removeItem("accountLocks");
+          }
+        }
       }, 1000);
     }
 
     return () => {
       if (timer) clearInterval(timer);
     };
-  }, [isAccountLocked, remainingTime]);
+  }, [lockedAccounts, remainingTimes, formData.username]);
 
   // Form event handlers
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
+
+    // If changing username, check if the new username is locked
+    if (name === "username" && value && lockedAccounts[value]) {
+      setError(
+        `Account "${value}" is locked. Try again in ${remainingTimes[value]} seconds or use another account.`
+      );
+    } else if (name === "username") {
+      setError(""); // Clear error when username changes to a non-locked account
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -107,8 +157,10 @@ const Auth = ({
         return "All fields are required";
       }
 
-      if (isAccountLocked) {
-        return `Account is locked. Try again in ${remainingTime} seconds.`;
+      if (isCurrentUserLocked()) {
+        return `Account "${
+          formData.username
+        }" is locked. Try again in ${getCurrentUserRemainingTime()} seconds or use another account.`;
       }
     } else {
       // Registration validation
@@ -161,7 +213,7 @@ const Auth = ({
     }
   };
 
-  // Registration handler
+  // Registration handler - no changes needed
   const handleRegistration = async () => {
     // Check if username already exists
     const existingUser = await UserAPI.getByUsername(formData.username);
@@ -194,28 +246,49 @@ const Auth = ({
     onSuccess();
   };
 
-  // Security related utility functions
-  const checkAccountLock = (username) => {
-    const lockData = localStorage.getItem("accountLock");
+  // Security related utility functions - updated for multi-account support
+  const checkAccountLocks = () => {
+    const locksData = localStorage.getItem("accountLocks");
 
-    if (!lockData) return;
+    if (!locksData) return;
 
     try {
-      const { username: lockedUser, until } = JSON.parse(lockData);
-      const currentTime = Date.now();
+      const locks = JSON.parse(locksData);
+      const now = Date.now();
+      const currentLocks = {};
+      const currentTimes = {};
 
-      if (username === lockedUser && until > currentTime) {
-        setIsAccountLocked(true);
-        setLockedUntil(until);
-        setRemainingTime(Math.ceil((until - currentTime) / 1000));
-      } else if (until < currentTime && username === lockedUser) {
-        // Lock expired, clear it
-        localStorage.removeItem("accountLock");
-        setIsAccountLocked(false);
+      Object.keys(locks).forEach((username) => {
+        const lockTime = locks[username];
+
+        if (lockTime > now) {
+          // Account still locked
+          currentLocks[username] = lockTime;
+          currentTimes[username] = Math.ceil((lockTime - now) / 1000);
+
+          // If this is the current username, show error
+          if (username === formData.username) {
+            setError(
+              `Account "${username}" is locked. Try again in ${currentTimes[username]} seconds or use another account.`
+            );
+          }
+        }
+      });
+
+      setLockedAccounts(currentLocks);
+      setRemainingTimes(currentTimes);
+
+      // Clean up expired locks in localStorage
+      if (Object.keys(currentLocks).length !== Object.keys(locks).length) {
+        if (Object.keys(currentLocks).length > 0) {
+          localStorage.setItem("accountLocks", JSON.stringify(currentLocks));
+        } else {
+          localStorage.removeItem("accountLocks");
+        }
       }
     } catch (e) {
-      console.error("Error parsing account lock data:", e);
-      localStorage.removeItem("accountLock"); // Clear potentially corrupted data
+      console.error("Error parsing account locks data:", e);
+      localStorage.removeItem("accountLocks"); // Clear potentially corrupted data
     }
   };
 
@@ -265,17 +338,30 @@ const Auth = ({
 
   const lockAccount = (username, minutes) => {
     try {
-      const until = Date.now() + minutes * 60 * 1000;
-      localStorage.setItem(
-        "accountLock",
-        JSON.stringify({
-          username,
-          until,
-        })
+      const lockTime = Date.now() + minutes * 60 * 1000;
+
+      // Update our state
+      setLockedAccounts((prev) => ({
+        ...prev,
+        [username]: lockTime,
+      }));
+
+      setRemainingTimes((prev) => ({
+        ...prev,
+        [username]: minutes * 60,
+      }));
+
+      // Update localStorage
+      const locksData = localStorage.getItem("accountLocks");
+      const locks = locksData ? JSON.parse(locksData) : {};
+
+      locks[username] = lockTime;
+      localStorage.setItem("accountLocks", JSON.stringify(locks));
+
+      // Set error message
+      setError(
+        `Too many failed attempts. Account "${username}" locked for ${minutes} minutes.`
       );
-      setIsAccountLocked(true);
-      setLockedUntil(until);
-      setRemainingTime(minutes * 60);
     } catch (e) {
       console.error("Error locking account:", e);
     }
@@ -289,7 +375,6 @@ const Auth = ({
     if (attempts >= 5) {
       // Lock account for 5 minutes after 5 failed attempts
       lockAccount(username, 5);
-      setError("Too many failed attempts. Account locked for 5 minutes.");
     } else if (attempts >= 3) {
       // Warning after 3 failed attempts
       setError(
@@ -300,17 +385,6 @@ const Auth = ({
       setError("Invalid username or password");
     }
   };
-
-  // Pre-defined JSX elements for cleaner return statement
-  const errorElement = error && (
-    <p
-      className={`${styles.errorMessage} ${
-        isAccountLocked ? styles.lockError : ""
-      }`}
-    >
-      {error}
-    </p>
-  );
 
   // Form fields based on authentication mode
   const formFields =
@@ -325,7 +399,7 @@ const Auth = ({
             value={formData.username}
             onChange={handleChange}
             className={styles.input}
-            disabled={isLoading || isAccountLocked}
+            disabled={isLoading}
           />
         </div>
         <div className={styles.formGroup}>
@@ -336,12 +410,12 @@ const Auth = ({
             value={formData.password}
             onChange={handleChange}
             className={styles.input}
-            disabled={isLoading || isAccountLocked}
+            disabled={isLoading || isCurrentUserLocked()}
           />
         </div>
       </>
     ) : (
-      // Registration form fields
+      // Registration form fields - unchanged
       <>
         <div className={styles.formGroup}>
           <input
@@ -410,7 +484,6 @@ const Auth = ({
           checked={rememberMe}
           onChange={(e) => setRememberMe(e.target.checked)}
           className={styles.rememberMeCheckbox}
-          disabled={isAccountLocked}
         />
         Remember me
       </label>
@@ -422,24 +495,24 @@ const Auth = ({
     if (isLoading) {
       return mode === "login" ? "Logging in..." : "Creating Account...";
     }
-    if (isAccountLocked) {
+    if (isCurrentUserLocked()) {
       return "Account Locked";
     }
     return mode === "login" ? "Log In" : "Sign Up";
   };
 
-  // Submit button
+  // Submit button - now only disabled if the current username is locked
   const submitButton = (
     <button
       type="submit"
       className={styles.submitButton}
-      disabled={isLoading || isAccountLocked}
+      disabled={isLoading || isCurrentUserLocked()}
     >
       {getButtonText()}
     </button>
   );
 
-  // Redirect link to alternate auth mode
+  // Redirect link to alternate auth mode - unchanged
   const redirectElement = (
     <div className={styles.redirectLink}>
       {redirectLabel} <Link to={redirectPath}>{redirectLinkText}</Link>
@@ -451,7 +524,15 @@ const Auth = ({
     <div className={styles.authContainer}>
       <div className={styles.authForm}>
         <h2 className={styles.heading}>{title}</h2>
-        {errorElement}
+        {error && (
+          <p
+            className={`${styles.errorMessage} ${
+              isCurrentUserLocked() ? styles.lockError : ""
+            }`}
+          >
+            {error}
+          </p>
+        )}
 
         <form onSubmit={handleSubmit}>
           {formFields}
