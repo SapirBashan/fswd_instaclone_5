@@ -4,6 +4,7 @@ import LoginPage from "./pages/LoginPage";
 import { Routes, Route, Navigate } from "react-router-dom";
 import SideNav from "./components/SideNev";
 import RegisterPage from "./pages/RegisterPage";
+import ProfileCompletionPage from "./pages/ProfileCompletionPage";
 import HomePage from "./pages/HomePage";
 import MyPostsPage from "./pages/MyPostsPage";
 import { UserStorage } from "./utils/LocalStorage";
@@ -47,6 +48,14 @@ function App() {
     );
   };
 
+  // Special route for profile completion - no sidebar needed
+  const ProfileCompletionRoute = ({ children }) => {
+    if (!isAuthenticated) {
+      return <Navigate to="/login" />;
+    }
+    return children;
+  };
+
   return (
     <Routes>
       <Route
@@ -69,6 +78,16 @@ function App() {
           )
         }
       />
+
+      <Route
+        path="/complete-profile/:userId"
+        element={
+          <ProfileCompletionRoute>
+            <ProfileCompletionPage />
+          </ProfileCompletionRoute>
+        }
+      />
+
       <Route
         path="/home"
         element={
@@ -100,7 +119,7 @@ function App() {
         path="/TODO"
         element={
           <ProtectedRoute>
-            <TodoPage/>
+            <TodoPage />
             {/* <div>TodoPage</div> */}
           </ProtectedRoute>
         }
