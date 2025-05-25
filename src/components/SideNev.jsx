@@ -52,16 +52,25 @@ const SideNav = ({ onLogout }) => {
           <span className={style.navIcon}>✅</span> TODO
         </Link>
 
-        <Link
+          <Link
           to="/my-posts"
           className={`${style.navItem} ${
             location.pathname === "/my-posts" ? style.active : ""
           }`}
         >
-          <span className={style.icon}>📝</span>
-          <span className={style.label}>My Posts</span>
+          <span className={style.navIcon}>📝</span> My Posts
         </Link>
-      </div>
+
+        </div>
+
+        <Link
+          to="/Info"
+          className={`${style.navItem} ${
+            location.pathname === "/Info" ? style.active : ""
+          }`}
+        >
+          <span className={style.navIcon}>ℹ️</span> Info
+        </Link>
 
       <div className={style.logoutSection}>
         <button onClick={onLogout} className={style.logoutButton}>

@@ -10,6 +10,7 @@ import MyPostsPage from "./pages/MyPostsPage";
 import { UserStorage } from "./utils/LocalStorage";
 import AlbumPage from "./pages/AlbumPage";
 import TodoPage from "./pages/TodoPage";
+import Info from "./pages/InfoPage";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -125,6 +126,17 @@ function App() {
         }
       />
 
+      <Route
+        path="/Info"
+        element={
+          <ProtectedRoute>
+            <Info />
+            {/* <div>InfoPage</div> */}
+          </ProtectedRoute>
+        }
+      /> 
+
+      
       <Route
         path="*"
         element={<Navigate to={isAuthenticated ? "/home" : "/login"} />}
