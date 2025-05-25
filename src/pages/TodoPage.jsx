@@ -1,7 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { TodoAPI } from '../utils/ServerDB';
 import { UserStorage } from '../utils/LocalStorage';
-import styles from './TodoPage.module.css';
+// Add Material-UI imports
+import {
+  Container,
+  Paper,
+  Typography,
+  TextField,
+  Button,
+  List,
+  ListItem,
+  ListItemText,
+  Checkbox,
+  IconButton,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Alert,
+  CircularProgress,
+  Box
+} from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 
 const TodoPage = () => {
   // States
@@ -106,70 +127,158 @@ const TodoPage = () => {
     }
   };
 
-  return (
-    <div className={styles.container}>
-      <h1>Todo List</h1>
+ return (
+  <Container maxWidth="md">
+    <Paper 
+      elevation={3} 
+      sx={{ p: 3, mt: 3 }}
+    >
+      {/* Header */}
+      <Typography variant="h4" gutterBottom>
+        Todo List
+      </Typography>
 
       {/* Search and Sort Controls */}
-      <div className={styles.controls}>
-        <div className={styles.search}>
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search todos..."
-          />
-          <select
+      <Box 
+        sx={{ 
+          display: 'flex', 
+          gap: 2, 
+          mb: 3 
+        }}
+      >
+<TextField
+  size="small"
+  value={searchTerm}
+  onChange={(e) => setSearchTerm(e.target.value)}
+  placeholder="Search todos..."
+  sx={{
+    flexGrow: 1,
+    '& .MuiOutlinedInput-root': {
+      borderRadius: '6px',
+      paddingY: '0',
+      '& input': {
+        paddingY: '0.6rem',
+        paddingX: '1rem',
+        fontSize: '1rem',
+        lineHeight: 1.5,
+      },
+    },
+    '& .MuiOutlinedInput-notchedOutline': {
+      border: 'none',
+    },
+  }}
+  variant="outlined"
+/>
+
+        
+        {/* Search By Dropdown */}
+        <FormControl 
+          size="small" 
+          sx={{ minWidth: 120 }}
+        >
+          <InputLabel>Search By</InputLabel>
+          <Select
             value={searchBy}
+            label="Search By"
             onChange={(e) => setSearchBy(e.target.value)}
           >
-            <option value="id">By ID</option>
-            <option value="title">By Title</option>
-            <option value="completed">By Status</option>
-          </select>
-        </div>
+            <MenuItem value="id">ID</MenuItem>
+            <MenuItem value="title">Title</MenuItem>
+            <MenuItem value="completed">Status</MenuItem>
+          </Select>
+        </FormControl>
 
-        <div className={styles.sort}>
-          <label>Sort by:</label>
-          <select
+        {/* Sort By Dropdown */}
+        <FormControl 
+          size="small" 
+          sx={{ minWidth: 120 }}
+        >
+          <InputLabel>Sort By</InputLabel>
+          <Select
             value={sortBy}
+            label="Sort By"
             onChange={(e) => setSortBy(e.target.value)}
           >
-            <option value="id">ID</option>
-            <option value="title">Title</option>
-            <option value="completed">Status</option>
-          </select>
-        </div>
-      </div>
+            <MenuItem value="id">ID</MenuItem>
+            <MenuItem value="title">Title</MenuItem>
+            <MenuItem value="completed">Status</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
 
       {/* Add New Todo Form */}
-      <form onSubmit={handleAddTodo} className={styles.addForm}>
-        <input
-          type="text"
-          value={newTodoTitle}
-          onChange={(e) => setNewTodoTitle(e.target.value)}
-          placeholder="New todo title..."
-        />
-        <button type="submit">Add Todo</button>
-      </form>
+      <Box 
+        component="form" 
+        onSubmit={handleAddTodo} 
+        sx={{ mb: 3 }}
+      >
+        <Box sx={{ display: 'flex', gap: 2 }}>
+        <TextField
+                fullWidth
+                size="small"
+                label="New Todo"
+                placeholder="New todo title..."
+                value={newTodoTitle}
+                onChange={(e) => setNewTodoTitle(e.target.value)}
+                variant="outlined"
+                sx={{
+                    '& .MuiOutlinedInput-root': {
+                    borderRadius: '6px',
+                    paddingY: '0', // reset vertical padding on container
+                    '& input': {
+                        paddingY: '0.6rem',  // vertical padding on input
+                        paddingX: '1rem',    // horizontal padding
+                        fontSize: '1rem',
+                        lineHeight: 1.5,
+                    },
+                    },
+                    '& .MuiOutlinedInput-notchedOutline': {
+                    border: 'none',
+                    },
+                }}
+                />
+
+
+
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+          >
+            Add Todo
+          </Button>
+        </Box>
+      </Box>
 
       {/* Error Message */}
       {error && (
-        <div className={styles.error}>
+        <Alert 
+          severity="error" 
+          onClose={() => setError(null)}
+          sx={{ mb: 2 }}
+        >
           {error}
-          <button onClick={() => setError(null)}>✕</button>
-        </div>
+        </Alert>
       )}
 
-      {/* Loading Message */}
-      {loading && <div className={styles.loading}>Loading...</div>}
+      {/* Loading Spinner */}
+      {loading && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
+          <CircularProgress />
+        </Box>
+      )}
 
       {/* Todos List */}
-      <ul className={styles.todoList}>
+      <List>
         {getSortedTodos().map(todo => (
-          <li key={todo.id} className={styles.todoItem}>
-            <input
-              type="checkbox"
+          <ListItem
+            key={todo.id}
+            sx={{
+              borderBottom: '1px solid #eee',
+              '&:last-child': { borderBottom: 'none' }
+            }}
+          >
+            <Checkbox
               checked={todo.completed}
               onChange={() => handleUpdateTodo(todo.id, {
                 ...todo,
@@ -178,8 +287,9 @@ const TodoPage = () => {
             />
             
             {editingTodo?.id === todo.id ? (
-              <input
-                type="text"
+             <TextField
+                fullWidth
+                size="small"
                 value={editingTodo.title}
                 onChange={(e) => setEditingTodo({
                   ...editingTodo,
@@ -189,27 +299,42 @@ const TodoPage = () => {
                 autoFocus
               />
             ) : (
-              <span
-                onClick={() => setEditingTodo(todo)}
-                className={todo.completed ? styles.completed : ''}
-              >
-                {todo.title}
-              </span>
+              <ListItemText
+                primary={todo.title}
+                sx={{
+                  textDecoration: todo.completed ? 'line-through' : 'none',
+                  color: todo.completed ? 'text.secondary' : 'text.primary'
+                }}
+              />
             )}
 
-            <div className={styles.todoId}>ID: {todo.id}</div>
-            
-            <button
-              onClick={() => handleDeleteTodo(todo.id)}
-              className={styles.deleteBtn}
-            >
-              Delete
-            </button>
-          </li>
+            <Box component="span">
+              <Typography 
+                variant="caption" 
+                sx={{ mr: 2, color: 'text.secondary' }}
+              >
+                ID: {todo.id}
+              </Typography>
+              <IconButton
+                edge="end"
+                onClick={() => setEditingTodo(todo)}
+                sx={{ mr: 1 }}
+              >
+                <EditIcon />
+              </IconButton>
+              <IconButton
+                edge="end"
+                onClick={() => handleDeleteTodo(todo.id)}
+                color="error"
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Box>
+          </ListItem>
         ))}
-      </ul>
-    </div>
-  );
+      </List>
+    </Paper>
+  </Container>
+);
 };
-
 export default TodoPage;
