@@ -1,21 +1,27 @@
 .loginContainer {
   position: fixed;
-  inset: 0; /* Shorthand for top: 0, right: 0, bottom: 0, left: 0 */
+  inset: 0;
   display: grid;
   place-items: center;
-  background-color: #fafafa;
+  /* background-image: url('../assets/background.png'); */
+  background-color: azure;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
+
 .loginForm {
-  background-color: white;
-  border: 1px solid #dbdbdb;
-  border-radius: 3px;
+  background-color: rgba(255, 255, 255, 0.95); /* Semi-transparent white */
+  backdrop-filter: blur(5px); /* Adds a subtle blur effect */
+  border: 1px solid rgba(219, 219, 219, 0.3);
+  border-radius: 8px;
   width: 350px;
   padding: 40px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-  color: #262626; /* Default text color */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  color: #262626;
 }
 
 .heading {
