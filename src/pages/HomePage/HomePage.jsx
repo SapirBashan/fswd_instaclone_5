@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { PostAPI, UserAPI } from "../../utils/ServerDB";
 import { UserStorage } from "../../utils/LocalStorage";
-import Post from "../../components/features/Post/Post"; // Import the Post component
+import Post from "../../components/features/Post/Post";
+import PostModal from "./PostShow";
 import style from "./HomePage.module.css";
 
 const HomePage = () => {
@@ -13,7 +14,16 @@ const HomePage = () => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const postsPerPage = 5;
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedPost, setSelectedPost] = useState(null);
 
+  const handlePostClick = (post) => {
+    setSelectedPost(post);
+  };
+
+  const handleClosePost = () => {
+    setSelectedPost(null);
+  };
   // Function to fetch user details for posts
   const fetchUserDetails = async (postList) => {
     try {
@@ -45,6 +55,35 @@ const HomePage = () => {
       console.error("Error in fetchUserDetails:", error);
     }
   };
+  const handleSearch = async (e) => {
+  e.preventDefault();
+  if (!searchQuery.trim()) {
+    // If search is empty, reset to normal feed
+    fetchRandomPosts();
+    return;
+  }
+
+  try {
+    setLoading(true);
+    setError(null);
+    const searchResults = await PostAPI.search(searchQuery, {
+      page: 1,
+      limit: postsPerPage
+    });
+    
+    setPosts(searchResults);
+    setPage(1);
+    setHasMore(searchResults.length === postsPerPage);
+    
+    // Fetch user details for search results
+    await fetchUserDetails(searchResults);
+  } catch (err) {
+    console.error("Error searching posts:", err);
+    setError("Failed to search posts. Please try again later.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Initial load of posts
   const fetchRandomPosts = async () => {
@@ -130,6 +169,35 @@ const HomePage = () => {
     <div className={style.homePage}>
       <h1 className={style.heading}>Discover Posts</h1>
 
+    <div className={style.searchContainer}>
+      <form onSubmit={handleSearch}>
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search posts..."
+          className={style.searchInput}
+        />
+        <button type="submit" className={style.searchButton}>
+          Search
+        </button>
+        {searchQuery && (
+          <button 
+            type="button" 
+            onClick={() => {
+              setSearchQuery("");
+              fetchRandomPosts();
+            }}
+            className={style.clearButton}
+          >
+            Clear
+          </button>
+        )}
+      </form>
+    </div>
+
+    <br />
+
       {loading && (
         <div className={style.loadingContainer}>
           <p>Loading feed...</p>
@@ -150,13 +218,26 @@ const HomePage = () => {
       )}
 
       {posts.map((post) => (
-        <Post
-          key={post.id}
-          post={post}
-          user={users[post.userId]}
-          variant="external"
-        />
+        <div 
+          key={post.id} 
+          onClick={() => handlePostClick(post)}
+          className={style.postWrapper}
+        >
+          <Post
+            post={post}
+            user={users[post.userId]}
+            variant="external"
+          />
+        </div>
       ))}
+
+      {selectedPost && (
+        <PostModal
+          post={selectedPost}
+          user={users[selectedPost.userId]}
+          onClose={handleClosePost}
+        />
+      )}
 
       {!loading && !error && posts.length > 0 && (
         <div className={style.loadMoreContainer}>
