@@ -1,0 +1,214 @@
+.likeContainer {
+  position: relative;
+  display: inline-block;
+}
+
+.likeSection {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.likeButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 16px;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+
+.likeButton:hover {
+  background-color: #f0f0f0;
+}
+
+.likeButton.liked {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.buttonText {
+  font-size: 13px;
+  color: #65676b;
+}
+
+.liked .buttonText {
+  color: #1976d2;
+  font-weight: 500;
+}
+
+.totalCount {
+  font-size: 13px;
+  color: #65676b;
+  font-weight: 500;
+}
+
+/* Portal container for emoji picker */
+.emojiPickerPortal {
+  pointer-events: none;
+}
+
+.emojiPickerPortal .emojiPicker {
+  pointer-events: all;
+}
+
+.emojiPicker {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+  min-width: 200px;
+  animation: emojiPickerFadeIn 0.2s ease-out;
+}
+
+@keyframes emojiPickerFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.emojiGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.emojiOption {
+  background: none;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 10px;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  min-height: 40px;
+}
+
+.emojiOption:hover {
+  background-color: #f5f5f5;
+  transform: scale(1.1);
+  border-color: #ccc;
+}
+
+.emojiOption.selected {
+  background-color: #e3f2fd;
+  border-color: #1976d2;
+  color: #1976d2;
+}
+
+.emojiOption:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  float: right;
+  color: #999;
+  font-size: 18px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.closeButton:hover {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.likesDisplay {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.emojiGroup {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: #f0f2f5;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 13px;
+}
+
+.emoji {
+  font-size: 16px;
+}
+
+.count {
+  color: #65676b;
+  font-weight: 500;
+}
+
+.likeSummary {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.emojiCount {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 12px;
+  color: #65676b;
+  background-color: #f0f2f5;
+  padding: 2px 6px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+.error {
+  color: #d32f2f;
+  font-size: 12px;
+  margin-bottom: 4px;
+  padding: 4px 8px;
+  background-color: #ffebee;
+  border-radius: 4px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .emojiPicker {
+    min-width: 180px;
+    padding: 12px;
+  }
+  
+  .emojiGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .emojiOption {
+    padding: 8px;
+    font-size: 16px;
+    min-height: 36px;
+  }
+}
+
+/* Ensure the picker is always visible */
+.emojiPickerPortal {
+  position: fixed !important;
+  z-index: 999999 !important;
+}

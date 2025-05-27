@@ -248,31 +248,49 @@ export const PostAPI = {
 export const CommentAPI = {
   // Get all comments
   getAll: async () => {
-    const { data } = await apiRequest("comments");
-    return data;
+    const response = await apiRequest("comments");
+    return response.data;
   },
 
   // Get comments by post ID
   getByPost: async (postId) => {
-    const { data } = await apiRequest(`comments?postId=${postId}`);
-    return data;
+    const response = await apiRequest(`comments?postId=${postId}`);
+    return response.data;
+  },
+
+  // Get comment by ID
+  getById: async (id) => {
+    const response = await apiRequest(`comments/${id}`);
+    return response.data;
   },
 
   // Create new comment
   create: async (commentData) => {
-    const { data } = await apiRequest("comments", {
+    const response = await apiRequest("comments", {
       method: "POST",
       body: JSON.stringify(commentData),
     });
-    return data;
+    return response.data;
+  },
+
+  // Update comment
+  update: async (id, commentData) => {
+    const response = await apiRequest(`comments/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(commentData),
+    });
+    return response.data;
   },
 
   // Delete comment
   delete: async (id) => {
-    await apiRequest(`comments/${id}`, { method: "DELETE" });
-    return true;
+    const response = await apiRequest(`comments/${id}`, {
+      method: "DELETE",
+    });
+    return response;
   },
 };
+
 
 /**
  * Album-related API functions
@@ -404,6 +422,97 @@ export const TodoAPI = {
 };
 
 /**
+ * Likes-related API functions
+ */
+export const LikesAPI = {
+  // Get all likes
+  getAll: async () => {
+    const response = await apiRequest("likes");
+    return response.data;
+  },
+
+  // Get likes by target (post or comment) and targetId
+  getByTarget: async (targetType, targetId) => {
+    const response = await apiRequest(`likes?targetType=${targetType}&targetId=${targetId}`);
+    return response.data;
+  },
+
+  // Get likes by user
+  getByUser: async (userId) => {
+    const response = await apiRequest(`likes?userId=${userId}`);
+    return response.data;
+  },
+
+  // Get specific like by user and target
+  getUserLike: async (userId, targetType, targetId) => {
+    const response = await apiRequest(`likes?userId=${userId}&targetType=${targetType}&targetId=${targetId}`);
+    return response.data[0] || null;
+  },
+
+  // Create new like
+  create: async (likeData) => {
+    const response = await apiRequest("likes", {
+      method: "POST",
+      body: JSON.stringify(likeData),
+    });
+    return response.data;
+  },
+
+  // Update like (change emoji)
+  update: async (id, likeData) => {
+    const response = await apiRequest(`likes/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(likeData),
+    });
+    return response.data;
+  },
+
+  // Delete like
+  delete: async (id) => {
+    const response = await apiRequest(`likes/${id}`, {
+      method: "DELETE",
+    });
+    return response;
+  },
+
+  // Toggle like (create if doesn't exist, delete if exists, update if different emoji)
+  toggle: async (userId, targetType, targetId, emoji) => {
+    try {
+      const existingLike = await LikesAPI.getUserLike(userId, targetType, targetId);
+      
+      if (existingLike) {
+        if (existingLike.emoji === emoji) {
+          // Same emoji, remove like
+          await LikesAPI.delete(existingLike.id);
+          return { action: 'removed', like: null };
+        } else {
+          // Different emoji, update like
+          const updatedLike = await LikesAPI.update(existingLike.id, {
+            ...existingLike,
+            emoji,
+            updatedAt: new Date().toISOString()
+          });
+          return { action: 'updated', like: updatedLike };
+        }
+      } else {
+        // No existing like, create new one
+        const newLike = await LikesAPI.create({
+          userId,
+          targetType, // 'post' or 'comment'
+          targetId,
+          emoji,
+          createdAt: new Date().toISOString()
+        });
+        return { action: 'created', like: newLike };
+      }
+    } catch (error) {
+      console.error('Error toggling like:', error);
+      throw error;
+    }
+  }
+};
+
+/**
  * Helper function for adding pagination
  * @param endpoint - The API endpoint
  * @param page - Page number (starts at 1)
@@ -429,12 +538,15 @@ export const getNestedResource = async (resource, id, nestedResource) => {
   return data;
 };
 
+
 export default {
   UserAPI,
   PostAPI,
   CommentAPI,
+  LikesAPI,
   AlbumAPI,
   PhotoAPI,
+  TodoAPI,
   getPaginatedData,
   getNestedResource,
 };

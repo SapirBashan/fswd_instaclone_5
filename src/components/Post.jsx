@@ -1,18 +1,21 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { PostAPI } from "../utils/ServerDB";
+import Comments from "./Comments";
+import LikeButton from "./LikeButton";
 import styles from "./Post.module.css";
 
 const Post = ({
   post,
   user,
-  variant = "external", // 'internal' or 'external'
+  variant = "external",
   onDelete = null,
   onUpdate = null,
 }) => {
   // State declarations
   const [isExpanded, setIsExpanded] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [showComments, setShowComments] = useState(false);
   const [editedPost, setEditedPost] = useState({
     title: post.title,
     body: post.body,
@@ -31,6 +34,10 @@ const Post = ({
 
   const toggleExpand = () => {
     if (!isInternal) setIsExpanded(!isExpanded);
+  };
+
+  const toggleComments = () => {
+    setShowComments(!showComments);
   };
 
   const handleEditClick = () => setIsEditing(true);
@@ -183,20 +190,25 @@ const Post = ({
   // Interaction buttons section JSX
   const interactionButtonsSection = (
     <div className={styles.interactionButtons}>
-      <button className={styles.actionButton}>❤️ Like</button>
-      <button className={styles.actionButton}>💬 Comment</button>
-      {!isInternal && (
-        <button className={styles.actionButton}>📤 Share</button>
-      )}
+      <LikeButton
+        targetType="post"
+        targetId={post.id}
+        variant={isInternal ? "full" : "compact"}
+      />
+      <button className={styles.actionButton} onClick={toggleComments}>
+        💬 {showComments ? "Hide Comments" : "Comments"}
+      </button>
+      {!isInternal && <button className={styles.actionButton}>📤 Share</button>}
     </div>
   );
 
   // Post statistics section JSX (for internal variant)
   const postStatsSection = isInternal && (
-    <div className={styles.stats}>
-      <span>👁️ 42 views</span>
-      <span>❤️ 7 likes</span>
-      <span>💬 3 comments</span>
+    <div className={styles.postStats}>
+      <span className={styles.statsItem}>Likes: {post.likes || 0}</span>
+      <span className={styles.statsItem}>
+        Comments: {post.commentsCount || 0}
+      </span>
     </div>
   );
 
@@ -206,15 +218,17 @@ const Post = ({
   // If in editing mode, return edit form only
   if (isEditing && isInternal) {
     return (
-      <div className={`${styles.post} ${styles.internal}`}>
-        {editForm}
-      </div>
+      <div className={`${styles.post} ${styles.internal}`}>{editForm}</div>
     );
   }
 
   // Regular post display with clean return statement
   return (
-    <div className={`${styles.post} ${isInternal ? styles.internal : styles.external}`}>
+    <div
+      className={`${styles.post} ${
+        isInternal ? styles.internal : styles.external
+      }`}
+    >
       <div className={styles.postHeader}>
         {userInfoSection}
         {postActionsSection}
@@ -230,6 +244,12 @@ const Post = ({
       </div>
 
       {errorMessage}
+
+      <Comments
+        postId={post.id}
+        isVisible={showComments}
+        onToggle={toggleComments}
+      />
     </div>
   );
 };

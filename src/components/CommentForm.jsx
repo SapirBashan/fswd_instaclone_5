@@ -1,0 +1,77 @@
+import React, { useState } from "react";
+import { CommentAPI } from "../utils/ServerDB";
+import { UserStorage } from "../utils/LocalStorage";
+import styles from "./Comments.module.css";
+
+const CommentForm = ({ postId, onCommentAdded }) => {
+  const [commentText, setCommentText] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!commentText.trim()) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const currentUser = UserStorage.getUser();
+      if (!currentUser) {
+        setError("You must be logged in to comment");
+        return;
+      }
+
+      // Create comment with the correct structure matching the API
+      const newComment = await CommentAPI.create({
+        postId: parseInt(postId),
+        name: currentUser.name || currentUser.username,
+        email: currentUser.email,
+        body: commentText.trim(),
+        createdAt: new Date().toISOString(),
+      });
+
+      onCommentAdded(newComment);
+      setCommentText("");
+    } catch (err) {
+      console.error("Error creating comment:", err);
+      setError("Failed to post comment. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Error message JSX
+  const errorMessage = error && <div className={styles.formError}>{error}</div>;
+
+  // Form JSX
+  const commentFormContent = (
+    <form onSubmit={handleSubmit} className={styles.commentForm}>
+      <textarea
+        value={commentText}
+        onChange={(e) => setCommentText(e.target.value)}
+        placeholder="Write a comment..."
+        className={styles.commentInput}
+        rows={3}
+        disabled={loading}
+      />
+      <button
+        type="submit"
+        className={styles.submitButton}
+        disabled={loading || !commentText.trim()}
+      >
+        {loading ? "Posting..." : "Post Comment"}
+      </button>
+    </form>
+  );
+
+  return (
+    <div className={styles.commentFormContainer}>
+      {errorMessage}
+      {commentFormContent}
+    </div>
+  );
+};
+
+export default CommentForm;
