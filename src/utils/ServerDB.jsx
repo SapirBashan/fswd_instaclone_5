@@ -252,10 +252,24 @@ export const CommentAPI = {
     return response.data;
   },
 
-  // Get comments by post ID
+  // Get comments by post ID with proper filtering
   getByPost: async (postId) => {
-    const response = await apiRequest(`comments?postId=${postId}`);
-    return response.data;
+    // Ensure postId is a number for proper comparison
+    const targetPostId = typeof postId === 'string' ? parseInt(postId) : postId;
+    
+    console.log("CommentAPI.getByPost - searching for postId:", targetPostId);
+    
+    const response = await apiRequest(`comments?postId=${targetPostId}`);
+    
+    // Additional client-side filtering to ensure we get the right comments
+    const filteredComments = response.data.filter(comment => {
+      const commentPostId = typeof comment.postId === 'string' ? parseInt(comment.postId) : comment.postId;
+      return commentPostId === targetPostId;
+    });
+    
+    console.log("CommentAPI.getByPost - found comments:", filteredComments);
+    
+    return filteredComments;
   },
 
   // Get comment by ID
@@ -266,10 +280,22 @@ export const CommentAPI = {
 
   // Create new comment
   create: async (commentData) => {
+    // Ensure the comment has all required fields with proper types
+    const completeCommentData = {
+      ...commentData,
+      postId: typeof commentData.postId === 'string' ? parseInt(commentData.postId) : commentData.postId,
+      createdAt: commentData.createdAt || new Date().toISOString()
+    };
+
+    console.log("CommentAPI.create - sending data:", completeCommentData);
+
     const response = await apiRequest("comments", {
       method: "POST",
-      body: JSON.stringify(commentData),
+      body: JSON.stringify(completeCommentData),
     });
+    
+    console.log("CommentAPI.create - response:", response.data);
+    
     return response.data;
   },
 
@@ -290,7 +316,6 @@ export const CommentAPI = {
     return response;
   },
 };
-
 
 /**
  * Album-related API functions
