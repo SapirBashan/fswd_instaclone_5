@@ -240,6 +240,19 @@ export const PostAPI = {
     await apiRequest(`posts/${id}`, { method: "DELETE" });
     return true;
   },
+  
+  search: async (query, options = {}) => {
+    try {
+      const { page = 1, limit = 10 } = options;
+      const queryParams = `q=${encodeURIComponent(query)}&_page=${page}&_limit=${limit}`;
+      const { data } = await apiRequest(`posts?${queryParams}`);
+      return data;
+    } catch (error) {
+      console.error("Error searching posts:", error);
+      throw error;
+    }
+  },
+
 };
 
 /**
