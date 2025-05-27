@@ -217,20 +217,31 @@ const HomePage = () => {
         </div>
       )}
 
-      {posts.map((post) => (
-        <div 
-          key={post.id} 
-          onClick={() => handlePostClick(post)}
-          className={style.postWrapper}
-        >
-          <Post
-            post={post}
-            user={users[post.userId]}
-            variant="external"
-          />
-        </div>
-      ))}
-
+     {posts.map((post) => (
+  <div 
+    key={post.id} 
+    onClick={(e) => {
+      // Check if the click is on comments or emoji sections
+      const target = e.target;
+      const isCommentSection = target.closest('.comments-section');
+      const isEmojiSection = target.closest('.emoji-section');
+      const isButton = target.tagName.toLowerCase() === 'button';
+      const isInput = target.tagName.toLowerCase() === 'input';
+      
+      // Only open modal if not clicking on interactive elements
+      if (!isCommentSection && !isEmojiSection && !isButton && !isInput) {
+        handlePostClick(post);
+      }
+    }}
+    className={style.postWrapper}
+  >
+    <Post
+      post={post}
+      user={users[post.userId]}
+      variant="external"
+    />
+  </div>
+))}
       {selectedPost && (
         <PostModal
           post={selectedPost}
