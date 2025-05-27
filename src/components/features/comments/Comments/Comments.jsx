@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { CommentAPI, UserAPI } from '../utils/ServerDB';
-import { UserStorage } from '../utils/LocalStorage';
-import CommentView from './CommentView';
-import CommentForm from './CommentForm';
-import styles from './Comments.module.css';
+import React, { useState, useEffect } from "react";
+import { CommentAPI, UserAPI } from "../../../../utils/ServerDB";
+import { UserStorage } from "../../../../utils/LocalStorage";
+import CommentView from "../CommentView/CommentView";
+import CommentForm from "../../../forms/CommentForm/CommentForm";
+import styles from "./Comments.module.css";
 
 const Comments = ({ postId, isVisible, onToggle }) => {
   const [comments, setComments] = useState([]);
@@ -21,15 +21,15 @@ const Comments = ({ postId, isVisible, onToggle }) => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const commentsData = await CommentAPI.getByPost(postId);
       setComments(commentsData);
-      
+
       // Fetch user details for comments
       await fetchUserDetails(commentsData);
     } catch (err) {
-      console.error('Error fetching comments:', err);
-      setError('Failed to load comments');
+      console.error("Error fetching comments:", err);
+      setError("Failed to load comments");
     } finally {
       setLoading(false);
     }
@@ -37,56 +37,60 @@ const Comments = ({ postId, isVisible, onToggle }) => {
 
   const fetchUserDetails = async (commentsData) => {
     // Extract unique emails from comments
-    const emails = [...new Set(commentsData.map(comment => comment.email))];
+    const emails = [...new Set(commentsData.map((comment) => comment.email))];
     const userDetails = { ...users };
-    
+
     for (const email of emails) {
       if (userDetails[email]) continue;
-      
+
       try {
         // Try to find user by email
         const allUsers = await UserAPI.getAll();
-        const user = allUsers.find(u => u.email === email);
-        
+        const user = allUsers.find((u) => u.email === email);
+
         if (user) {
           userDetails[email] = user;
         } else {
           // Fallback for external commenters
-          userDetails[email] = { 
-            username: email.split('@')[0],
+          userDetails[email] = {
+            username: email.split("@")[0],
             email: email,
-            name: commentsData.find(c => c.email === email)?.name || email.split('@')[0]
+            name:
+              commentsData.find((c) => c.email === email)?.name ||
+              email.split("@")[0],
           };
         }
       } catch (e) {
-        console.error('Error fetching user for email:', email, e);
+        console.error("Error fetching user for email:", email, e);
         // Fallback for any errors
-        userDetails[email] = { 
-          username: email.split('@')[0],
+        userDetails[email] = {
+          username: email.split("@")[0],
           email: email,
-          name: commentsData.find(c => c.email === email)?.name || email.split('@')[0]
+          name:
+            commentsData.find((c) => c.email === email)?.name ||
+            email.split("@")[0],
         };
       }
     }
-    
+
     setUsers(userDetails);
   };
 
   const handleCommentAdded = (newComment) => {
-    setComments(prev => [newComment, ...prev]);
-    
+    setComments((prev) => [newComment, ...prev]);
+
     // Add current user to users if not already there
     const currentUser = UserStorage.getUser();
     if (currentUser && !users[currentUser.email]) {
-      setUsers(prev => ({
+      setUsers((prev) => ({
         ...prev,
-        [currentUser.email]: currentUser
+        [currentUser.email]: currentUser,
       }));
     }
   };
 
   const handleCommentDelete = (commentId) => {
-    setComments(prev => prev.filter(comment => comment.id !== commentId));
+    setComments((prev) => prev.filter((comment) => comment.id !== commentId));
   };
 
   // Loading state JSX
@@ -112,7 +116,7 @@ const Comments = ({ postId, isVisible, onToggle }) => {
   );
 
   // Comments list JSX
-  const commentsList = comments.map(comment => (
+  const commentsList = comments.map((comment) => (
     <CommentView
       key={comment.id}
       comment={comment}

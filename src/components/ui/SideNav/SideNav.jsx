@@ -1,21 +1,6 @@
-// the side navigation bar
-// this component is used in every internal page
-// it purpose is to provide a navigation bar for the user to navigate through the application
-// taking the navigation logic and code out of the main component
-// and putting it in a separate component
-
-// the general structure of the side navigation bar is as follows:
-// it will be located on the left side of the page
-// it will have a main area for the main navigation
-// which includes :
-// the albums , the posts , the main page  and the TODO items
-// and a secondary area for the secondary navigation
-// which includes:
-// the logout and the Info
-
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import style from "./SideNev.module.css";
+import style from "./SideNav.module.css";
 
 const SideNav = ({ onLogout }) => {
   const location = useLocation();
@@ -52,7 +37,7 @@ const SideNav = ({ onLogout }) => {
           <span className={style.navIcon}>✅</span> TODO
         </Link>
 
-          <Link
+        <Link
           to="/my-posts"
           className={`${style.navItem} ${
             location.pathname === "/my-posts" ? style.active : ""
@@ -60,17 +45,16 @@ const SideNav = ({ onLogout }) => {
         >
           <span className={style.navIcon}>📝</span> My Posts
         </Link>
+      </div>
 
-        </div>
-
-        <Link
-          to="/Info"
-          className={`${style.navItem} ${
-            location.pathname === "/Info" ? style.active : ""
-          }`}
-        >
-          <span className={style.navIcon}>ℹ️</span> Info
-        </Link>
+      <Link
+        to="/Info"
+        className={`${style.navItem} ${
+          location.pathname === "/Info" ? style.active : ""
+        }`}
+      >
+        <span className={style.navIcon}>ℹ️</span> Info
+      </Link>
 
       <div className={style.logoutSection}>
         <button onClick={onLogout} className={style.logoutButton}>

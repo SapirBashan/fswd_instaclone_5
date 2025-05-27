@@ -1,16 +1,19 @@
 import { useState, useEffect } from "react";
-import "./App.css";
-import LoginPage from "./pages/LoginPage";
 import { Routes, Route, Navigate } from "react-router-dom";
-import SideNav from "./components/SideNev";
-import RegisterPage from "./pages/RegisterPage";
-import ProfileCompletionPage from "./pages/ProfileCompletionPage";
-import HomePage from "./pages/HomePage";
-import MyPostsPage from "./pages/MyPostsPage";
+import "./App.css";
 import { UserStorage } from "./utils/LocalStorage";
-import AlbumPage from "./pages/AlbumPage";
-import TodoPage from "./pages/TodoPage";
-import Info from "./pages/InfoPage";
+import SideNav from "./components/ui/SideNav/SideNav";
+
+// pages imports
+import LoginPage from "./pages/auth/LoginPage/LoginPage";
+import RegisterPage from "./pages/auth/RegisterPage/RegisterPage";
+import ProfileCompletionPage from "./pages/auth/ProfileCompletionPage/ProfileCompletionPage";
+
+import HomePage from "./pages/HomePage/HomePage";
+import MyPostsPage from "./pages/MyPostsPage/MyPostsPage";
+import TodoPage from "./pages/TodoPage/TodoPage";
+import AlbumPage from "./pages/AlbumPage/AlbumPage";
+import Info from "./pages/InfoPage/InfoPage";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -134,9 +137,8 @@ function App() {
             {/* <div>InfoPage</div> */}
           </ProtectedRoute>
         }
-      /> 
+      />
 
-      
       <Route
         path="*"
         element={<Navigate to={isAuthenticated ? "/home" : "/login"} />}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { PostAPI, UserAPI } from "../utils/ServerDB";
-import { UserStorage } from "../utils/LocalStorage";
-import Post from "../components/Post"; // Import the Post component
+import { PostAPI, UserAPI } from "../../utils/ServerDB";
+import { UserStorage } from "../../utils/LocalStorage";
+import Post from "../../components/features/Post/Post"; // Import the Post component
 import style from "./HomePage.module.css";
 
 const HomePage = () => {
@@ -26,7 +26,7 @@ const HomePage = () => {
       for (const userId of userIds) {
         // Skip if we already have this user's details
         if (userDetails[userId]) continue;
-        
+
         hasNewUsers = true;
         try {
           const user = await UserAPI.getById(userId);
@@ -63,7 +63,6 @@ const HomePage = () => {
         excludeUserId: currentUserId,
       });
 
-
       setPosts(Posts);
       setHasMore(Posts.length === postsPerPage);
 
@@ -95,7 +94,6 @@ const HomePage = () => {
         limit: postsPerPage,
         excludeUserId: currentUserId,
       });
-
 
       // Filter out any duplicates (might happen with random posts)
       const newPosts = morePosts.filter(

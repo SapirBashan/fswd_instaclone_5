@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { UserStorage } from '../utils/LocalStorage';
-import { UserAPI } from '../utils/ServerDB';
+import { useState, useEffect } from "react";
+import { UserStorage } from "../../utils/LocalStorage";
+import { UserAPI } from "../../utils/ServerDB";
 import {
   Card,
   CardContent,
@@ -13,7 +13,7 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-} from '@mui/material';
+} from "@mui/material";
 
 import {
   Person,
@@ -23,7 +23,7 @@ import {
   Business,
   LocationOn,
   Work,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 
 const InfoPage = () => {
   const [userInfo, setUserInfo] = useState(null);
@@ -35,9 +35,9 @@ const InfoPage = () => {
       try {
         // Get current user from localStorage
         const currentUser = UserStorage.getUser();
-        
+
         if (!currentUser) {
-          throw new Error('No user found in storage');
+          throw new Error("No user found in storage");
         }
 
         // Fetch detailed user info from the server
@@ -55,7 +55,7 @@ const InfoPage = () => {
 
   if (loading) {
     return (
-      <Box sx={{ p: 3, textAlign: 'center' }}>
+      <Box sx={{ p: 3, textAlign: "center" }}>
         <Typography>Loading user information...</Typography>
       </Box>
     );
@@ -63,7 +63,7 @@ const InfoPage = () => {
 
   if (error) {
     return (
-      <Box sx={{ p: 3, textAlign: 'center' }}>
+      <Box sx={{ p: 3, textAlign: "center" }}>
         <Typography color="error">{error}</Typography>
       </Box>
     );
@@ -71,14 +71,14 @@ const InfoPage = () => {
 
   if (!userInfo) {
     return (
-      <Box sx={{ p: 3, textAlign: 'center' }}>
+      <Box sx={{ p: 3, textAlign: "center" }}>
         <Typography>No user information available</Typography>
       </Box>
     );
   }
 
   return (
-    <Box sx={{ p: 3, maxWidth: 800, margin: '0 auto' }}>
+    <Box sx={{ p: 3, maxWidth: 800, margin: "0 auto" }}>
       <Typography variant="h4" gutterBottom sx={{ mb: 4 }}>
         User Profile
       </Typography>
@@ -90,21 +90,15 @@ const InfoPage = () => {
             <ListItemIcon>
               <Person />
             </ListItemIcon>
-            <ListItemText 
-              primary="Name"
-              secondary={userInfo.name}
-            />
+            <ListItemText primary="Name" secondary={userInfo.name} />
           </ListItem>
           <Divider />
-          
+
           <ListItem>
             <ListItemIcon>
               <Person />
             </ListItemIcon>
-            <ListItemText 
-              primary="Username"
-              secondary={userInfo.username}
-            />
+            <ListItemText primary="Username" secondary={userInfo.username} />
           </ListItem>
           <Divider />
 
@@ -112,10 +106,7 @@ const InfoPage = () => {
             <ListItemIcon>
               <Email />
             </ListItemIcon>
-            <ListItemText 
-              primary="Email"
-              secondary={userInfo.email}
-            />
+            <ListItemText primary="Email" secondary={userInfo.email} />
           </ListItem>
         </List>
       </Paper>
@@ -127,10 +118,7 @@ const InfoPage = () => {
             <ListItemIcon>
               <Phone />
             </ListItemIcon>
-            <ListItemText 
-              primary="Phone"
-              secondary={userInfo.phone}
-            />
+            <ListItemText primary="Phone" secondary={userInfo.phone} />
           </ListItem>
           <Divider />
 
@@ -138,10 +126,7 @@ const InfoPage = () => {
             <ListItemIcon>
               <Language />
             </ListItemIcon>
-            <ListItemText 
-              primary="Website"
-              secondary={userInfo.website}
-            />
+            <ListItemText primary="Website" secondary={userInfo.website} />
           </ListItem>
         </List>
       </Paper>
@@ -150,7 +135,7 @@ const InfoPage = () => {
       <Paper elevation={3} sx={{ mb: 3 }}>
         <CardContent>
           <Typography variant="h6" gutterBottom>
-            <LocationOn sx={{ mr: 1, verticalAlign: 'middle' }} />
+            <LocationOn sx={{ mr: 1, verticalAlign: "middle" }} />
             Address
           </Typography>
           <Grid container spacing={2} sx={{ pl: 4 }}>
@@ -166,7 +151,8 @@ const InfoPage = () => {
             </Grid>
             <Grid item xs={12}>
               <Typography variant="caption">
-                Coordinates: {userInfo.address.geo.lat}, {userInfo.address.geo.lng}
+                Coordinates: {userInfo.address.geo.lat},{" "}
+                {userInfo.address.geo.lng}
               </Typography>
             </Grid>
           </Grid>
@@ -177,13 +163,15 @@ const InfoPage = () => {
       <Paper elevation={3}>
         <CardContent>
           <Typography variant="h6" gutterBottom>
-            <Business sx={{ mr: 1, verticalAlign: 'middle' }} />
+            <Business sx={{ mr: 1, verticalAlign: "middle" }} />
             Company Information
           </Typography>
           <Grid container spacing={2} sx={{ pl: 4 }}>
             <Grid item xs={12}>
               <Typography>
-                <Work sx={{ mr: 1, verticalAlign: 'middle', fontSize: 'small' }} />
+                <Work
+                  sx={{ mr: 1, verticalAlign: "middle", fontSize: "small" }}
+                />
                 {userInfo.company.name}
               </Typography>
             </Grid>

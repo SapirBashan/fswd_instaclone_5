@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { LikesAPI } from "../utils/ServerDB";
-import { UserStorage } from "../utils/LocalStorage";
+import { LikesAPI } from "../../../utils/ServerDB";
+import { UserStorage } from "../../../utils/LocalStorage";
 import styles from "./LikeButton.module.css";
 
 const LikeButton = ({ targetType, targetId, variant = "full" }) => {
@@ -49,7 +49,7 @@ const LikeButton = ({ targetType, targetId, variant = "full" }) => {
       if (
         containerRef.current &&
         !containerRef.current.contains(event.target) &&
-        !event.target.closest('.emoji-picker-portal')
+        !event.target.closest(".emoji-picker-portal")
       ) {
         setShowEmojiPicker(false);
       }
@@ -72,7 +72,7 @@ const LikeButton = ({ targetType, targetId, variant = "full" }) => {
       document.addEventListener("mousedown", handleClickOutside);
       window.addEventListener("scroll", handleScroll, true);
       window.addEventListener("resize", handleResize);
-      
+
       return () => {
         document.removeEventListener("mousedown", handleClickOutside);
         window.removeEventListener("scroll", handleScroll, true);
@@ -172,41 +172,43 @@ const LikeButton = ({ targetType, targetId, variant = "full" }) => {
   const totalLikes = likes.length;
 
   // Emoji picker JSX - Using Portal to render outside component tree
-  const emojiPicker = showEmojiPicker && createPortal(
-    <div 
-      className={`${styles.emojiPickerPortal} emoji-picker-portal`}
-      style={{
-        position: 'fixed',
-        top: `${pickerPosition.top}px`,
-        left: `${pickerPosition.left}px`,
-        zIndex: 999999
-      }}
-    >
-      <div className={styles.emojiPicker}>
-        <div className={styles.emojiGrid}>
-          {availableEmojis.map((emoji) => (
-            <button
-              key={emoji}
-              onClick={() => handleEmojiClick(emoji)}
-              className={`${styles.emojiOption} ${
-                userLike?.emoji === emoji ? styles.selected : ""
-              }`}
-              disabled={loading}
-            >
-              {emoji}
-            </button>
-          ))}
+  const emojiPicker =
+    showEmojiPicker &&
+    createPortal(
+      <div
+        className={`${styles.emojiPickerPortal} emoji-picker-portal`}
+        style={{
+          position: "fixed",
+          top: `${pickerPosition.top}px`,
+          left: `${pickerPosition.left}px`,
+          zIndex: 999999,
+        }}
+      >
+        <div className={styles.emojiPicker}>
+          <div className={styles.emojiGrid}>
+            {availableEmojis.map((emoji) => (
+              <button
+                key={emoji}
+                onClick={() => handleEmojiClick(emoji)}
+                className={`${styles.emojiOption} ${
+                  userLike?.emoji === emoji ? styles.selected : ""
+                }`}
+                disabled={loading}
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={() => setShowEmojiPicker(false)}
+            className={styles.closeButton}
+          >
+            ✕
+          </button>
         </div>
-        <button
-          onClick={() => setShowEmojiPicker(false)}
-          className={styles.closeButton}
-        >
-          ✕
-        </button>
-      </div>
-    </div>,
-    document.body
-  );
+      </div>,
+      document.body
+    );
 
   // Like summary for compact variant
   const likeSummary = variant === "compact" && totalLikes > 0 && (

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import style from '../pages/AlbumPage.module.css';
+import style from "../../../pages/AlbumPage/AlbumPage.module.css";
 
 export const AlbumListView = ({ 
   albums, 
@@ -296,4 +296,3 @@ export const PhotosGridView = ({
     )}
   </div>
 );
-

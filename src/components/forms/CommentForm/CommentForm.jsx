@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { CommentAPI } from "../utils/ServerDB";
-import { UserStorage } from "../utils/LocalStorage";
-import styles from "./Comments.module.css";
+import { CommentAPI } from "../../../utils/ServerDB";
+import { UserStorage } from "../../../utils/LocalStorage";
+import styles from "../../features/comments/Comments/Comments.module.css";
 
 const CommentForm = ({ postId, onCommentAdded }) => {
   const [commentText, setCommentText] = useState("");

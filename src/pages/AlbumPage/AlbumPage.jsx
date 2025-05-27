@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
-import { AlbumAPI, PhotoAPI } from "../utils/ServerDB";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { UserStorage } from "../utils/LocalStorage";
+import { AlbumAPI, PhotoAPI } from "../../utils/ServerDB";
+import { UserStorage } from "../../utils/LocalStorage";
 import style from "./AlbumPage.module.css";
 import {
   AlbumListView,
@@ -9,7 +9,7 @@ import {
   LightboxView,
   PhotosGridView,
   AlbumDetailView,
-} from "../components/AlbumPageViews";
+} from "../../components/features/AlbumViews/AlbumPageViews";
 
 const AlbumPage = () => {
   // Router hooks

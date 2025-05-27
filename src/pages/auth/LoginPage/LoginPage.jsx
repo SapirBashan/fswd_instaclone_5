@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import Login from "../components/Login";
+import Login from "../../../components/forms/auth/Login/Login";
 import styles from "./LoginPage.module.css";
 
 const LoginPage = ({ onLoginSuccess }) => {

@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import Register from "../components/Register";
+import Register from "../../../components/forms/auth/Register/Register";
 import styles from "./RegisterPage.module.css";
 
 const RegisterPage = ({ onRegisterSuccess }) => {

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { UserAPI } from "../utils/ServerDB";
-import { UserStorage } from "../utils/LocalStorage";
+import { UserAPI } from "../../../../utils/ServerDB";
+import { UserStorage } from "../../../../utils/LocalStorage";
 
 const Register = ({ onRegisterSuccess }) => {
   const navigate = useNavigate();

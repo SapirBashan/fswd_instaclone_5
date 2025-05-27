@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { UserAPI } from "../utils/ServerDB";
-import { UserStorage } from "../utils/LocalStorage";
+import { UserAPI } from "../../../../utils/ServerDB";
+import { UserStorage } from "../../../../utils/LocalStorage";
 
 const ProfileCompletion = () => {
   const { userId } = useParams();

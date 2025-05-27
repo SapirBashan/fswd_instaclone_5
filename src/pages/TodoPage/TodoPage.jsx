@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { TodoAPI } from '../utils/ServerDB';
-import { UserStorage } from '../utils/LocalStorage';
+import React, { useState, useEffect } from "react";
+import { TodoAPI } from "../../utils/ServerDB";
+import { UserStorage } from "../../utils/LocalStorage";
 // Add Material-UI imports
 import {
   Container,
@@ -19,20 +19,20 @@ import {
   MenuItem,
   Alert,
   CircularProgress,
-  Box
-} from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
+  Box,
+} from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 
 const TodoPage = () => {
   // States
   const [todos, setTodos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [sortBy, setSortBy] = useState('id');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searchBy, setSearchBy] = useState('title');
-  const [newTodoTitle, setNewTodoTitle] = useState('');
+  const [sortBy, setSortBy] = useState("id");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchBy, setSearchBy] = useState("title");
+  const [newTodoTitle, setNewTodoTitle] = useState("");
   const [editingTodo, setEditingTodo] = useState(null);
 
   // Get current user
@@ -45,13 +45,13 @@ const TodoPage = () => {
 
   const loadTodos = async () => {
     if (!userId) return;
-    
+
     try {
       setLoading(true);
       const data = await TodoAPI.getByUser(userId);
       setTodos(data);
     } catch (err) {
-      setError('Failed to load todos');
+      setError("Failed to load todos");
     } finally {
       setLoading(false);
     }
@@ -59,15 +59,15 @@ const TodoPage = () => {
 
   // Sort todos
   const getSortedTodos = () => {
-    const filtered = todos.filter(todo => {
-      if (searchTerm === '') return true;
-      
+    const filtered = todos.filter((todo) => {
+      if (searchTerm === "") return true;
+
       switch (searchBy) {
-        case 'id':
+        case "id":
           return todo.id.toString().includes(searchTerm);
-        case 'title':
+        case "title":
           return todo.title.toLowerCase().includes(searchTerm.toLowerCase());
-        case 'completed':
+        case "completed":
           return todo.completed.toString() === searchTerm.toLowerCase();
         default:
           return true;
@@ -76,12 +76,12 @@ const TodoPage = () => {
 
     return [...filtered].sort((a, b) => {
       switch (sortBy) {
-        case 'id':
+        case "id":
           return a.id - b.id;
-        case 'title':
+        case "title":
           return a.title.localeCompare(b.title);
-        case 'completed':
-          return (a.completed === b.completed) ? 0 : a.completed ? -1 : 1;
+        case "completed":
+          return a.completed === b.completed ? 0 : a.completed ? -1 : 1;
         default:
           return 0;
       }
@@ -97,97 +97,97 @@ const TodoPage = () => {
       const newTodo = await TodoAPI.create({
         userId,
         title: newTodoTitle,
-        completed: false
+        completed: false,
       });
-      setTodos(prev => [...prev, newTodo]);
-      setNewTodoTitle('');
+      setTodos((prev) => [...prev, newTodo]);
+      setNewTodoTitle("");
     } catch (err) {
-      setError('Failed to add todo');
+      setError("Failed to add todo");
     }
   };
 
   const handleUpdateTodo = async (id, updates) => {
     try {
       const updatedTodo = await TodoAPI.update(id, updates);
-      setTodos(prev => prev.map(todo => 
-        todo.id === id ? updatedTodo : todo
-      ));
+      setTodos((prev) =>
+        prev.map((todo) => (todo.id === id ? updatedTodo : todo))
+      );
       setEditingTodo(null);
     } catch (err) {
-      setError('Failed to update todo');
+      setError("Failed to update todo");
     }
   };
 
   const handleDeleteTodo = async (id) => {
     try {
       await TodoAPI.delete(id);
-      setTodos(prev => prev.filter(todo => todo.id !== id));
+      setTodos((prev) => prev.filter((todo) => todo.id !== id));
     } catch (err) {
-      setError('Failed to delete todo');
+      setError("Failed to delete todo");
     }
   };
 
- const styles = {
+  const styles = {
     container: {
       p: 3,
-      mt: 3
+      mt: 3,
     },
     searchContainer: {
-      display: 'flex',
+      display: "flex",
       gap: 2,
-      mb: 3
+      mb: 3,
     },
     formControl: {
-      minWidth: 120
+      minWidth: 120,
     },
     textField: {
       flexGrow: 1,
-      '& .MuiOutlinedInput-root': {
-        borderRadius: '6px',
-        paddingY: '0',
-        '& input': {
-          paddingY: '0.6rem',
-          paddingX: '1rem',
-          fontSize: '1rem',
+      "& .MuiOutlinedInput-root": {
+        borderRadius: "6px",
+        paddingY: "0",
+        "& input": {
+          paddingY: "0.6rem",
+          paddingX: "1rem",
+          fontSize: "1rem",
           lineHeight: 1.5,
         },
       },
-      '& .MuiOutlinedInput-notchedOutline': {
-        border: 'none',
+      "& .MuiOutlinedInput-notchedOutline": {
+        border: "none",
       },
     },
     listItem: {
-      borderBottom: '1px solid #eee',
-      '&:last-child': { borderBottom: 'none' }
+      borderBottom: "1px solid #eee",
+      "&:last-child": { borderBottom: "none" },
     },
     completedText: {
-      textDecoration: 'line-through',
-      color: 'text.secondary'
+      textDecoration: "line-through",
+      color: "text.secondary",
     },
     normalText: {
-      textDecoration: 'none',
-      color: 'text.primary'
+      textDecoration: "none",
+      color: "text.primary",
     },
     idText: {
       mr: 2,
-      color: 'text.secondary'
+      color: "text.secondary",
     },
     editButton: {
-      mr: 1
-    }
+      mr: 1,
+    },
   };
 
   // Form configurations
   const searchByOptions = [
-    { value: 'id', label: 'ID' },
-    { value: 'title', label: 'Title' },
-    { value: 'completed', label: 'Status' }
+    { value: "id", label: "ID" },
+    { value: "title", label: "Title" },
+    { value: "completed", label: "Status" },
   ];
 
   const sortByOptions = [
-    { value: 'id', label: 'ID' },
-    { value: 'title', label: 'Title' },
-    { value: 'completed', label: 'Status' }
+    { value: "id", label: "ID" },
+    { value: "title", label: "Title" },
+    { value: "completed", label: "Status" },
   ];
 
   return (
@@ -214,7 +214,7 @@ const TodoPage = () => {
               label="Search By"
               onChange={(e) => setSearchBy(e.target.value)}
             >
-              {searchByOptions.map(option => (
+              {searchByOptions.map((option) => (
                 <MenuItem key={option.value} value={option.value}>
                   {option.label}
                 </MenuItem>
@@ -229,7 +229,7 @@ const TodoPage = () => {
               label="Sort By"
               onChange={(e) => setSortBy(e.target.value)}
             >
-              {sortByOptions.map(option => (
+              {sortByOptions.map((option) => (
                 <MenuItem key={option.value} value={option.value}>
                   {option.label}
                 </MenuItem>
@@ -239,7 +239,7 @@ const TodoPage = () => {
         </Box>
 
         <Box component="form" onSubmit={handleAddTodo} sx={{ mb: 3 }}>
-          <Box sx={{ display: 'flex', gap: 2 }}>
+          <Box sx={{ display: "flex", gap: 2 }}>
             <TextField
               fullWidth
               size="small"
@@ -263,31 +263,35 @@ const TodoPage = () => {
         )}
 
         {loading && (
-          <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
+          <Box sx={{ display: "flex", justifyContent: "center", my: 2 }}>
             <CircularProgress />
           </Box>
         )}
 
         <List>
-          {getSortedTodos().map(todo => (
+          {getSortedTodos().map((todo) => (
             <ListItem key={todo.id} sx={styles.listItem}>
               <Checkbox
                 checked={todo.completed}
-                onChange={() => handleUpdateTodo(todo.id, {
-                  ...todo,
-                  completed: !todo.completed
-                })}
+                onChange={() =>
+                  handleUpdateTodo(todo.id, {
+                    ...todo,
+                    completed: !todo.completed,
+                  })
+                }
               />
-              
+
               {editingTodo?.id === todo.id ? (
                 <TextField
                   fullWidth
                   size="small"
                   value={editingTodo.title}
-                  onChange={(e) => setEditingTodo({
-                    ...editingTodo,
-                    title: e.target.value,
-                  })}
+                  onChange={(e) =>
+                    setEditingTodo({
+                      ...editingTodo,
+                      title: e.target.value,
+                    })
+                  }
                   onBlur={() => handleUpdateTodo(todo.id, editingTodo)}
                   autoFocus
                   variant="outlined"

@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { PostAPI } from "../utils/ServerDB";
-import Comments from "./Comments";
-import LikeButton from "./LikeButton";
+import { PostAPI } from "../../../utils/ServerDB";
+import Comments from "../comments/Comments/Comments";
+import LikeButton from "../../ui/LikeButton/LikeButton";
 import styles from "./Post.module.css";
 
 const Post = ({
