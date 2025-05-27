@@ -124,7 +124,6 @@ function App() {
         element={
           <ProtectedRoute>
             <TodoPage />
-            {/* <div>TodoPage</div> */}
           </ProtectedRoute>
         }
       />
@@ -134,7 +133,6 @@ function App() {
         element={
           <ProtectedRoute>
             <Info />
-            {/* <div>InfoPage</div> */}
           </ProtectedRoute>
         }
       />

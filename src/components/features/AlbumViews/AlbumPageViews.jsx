@@ -112,72 +112,7 @@ export const LightboxView = ({ fullScreenImage, setFullScreenImage }) =>
     </div>
   ) : null;
 
-// export const PhotosGridView = ({ 
-//   photos, 
-//   hasMore, 
-//   loading, 
-//   loadingImages, 
-//   setLoadingImages, 
-//   setFullScreenImage, 
-//   setEditingPhoto, 
-//   setNewPhotoUrl, 
-//   handlePhotoAction, 
-//   setPage,
-//   photosContainerRef 
-// }) => (
-//   <div className={style.photoGrid} ref={photosContainerRef}>
-//     {photos.map((photo) => (
-//       <div key={photo.id} className={style.photoCard}>
-//         <div className={style.imageContainer}>
-//           {!loadingImages[photo.id] && (
-//             <div className={style.imagePlaceholder}></div>
-//           )}
-//           <img
-//             src={photo.thumbnailUrl || photo.url}
-//             alt={photo.title}
-//             width={120}
-//             height={120}
-//             loading="lazy"
-//             onClick={() => setFullScreenImage(photo)}
-//             onLoad={() => {
-//               setLoadingImages((prev) => ({ ...prev, [photo.id]: true }));
-//             }}
-//             style={{
-//               opacity: loadingImages[photo.id] ? 1 : 0,
-//               transition: "opacity 0.3s",
-//               cursor: "pointer",
-//             }}
-//           />
-//         </div>
-//         <div className={style.photoTitle}>{photo.title}</div>
-//         <div className={style.photoControls}>
-//           <button
-//             onClick={() => {
-//               setEditingPhoto(photo);
-//               setNewPhotoUrl(photo.url);
-//             }}
-//           >
-//             Edit
-//           </button>
-//           <button onClick={() => handlePhotoAction("delete", null, photo.id)}>
-//             Delete
-//           </button>
-//         </div>
-//       </div>
-//     ))}
-
-//     {hasMore && (
-//       <button
-//         className={style.loadMoreButton}
-//         onClick={() => setPage((p) => p + 1)}
-//         disabled={loading}
-//       >
-//         {loading ? "Loading..." : "Load More Photos"}
-//       </button>
-//     )}
-//   </div>
-// );
-
+  
 export const AlbumDetailView = ({ 
   selectedAlbum, 
   setSelectedAlbum, 

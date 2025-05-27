@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { PostAPI, UserAPI } from "../../utils/ServerDB";
 import { UserStorage } from "../../utils/LocalStorage";
 import Post from "../../components/features/Post/Post";
-import PostModal from "./PostShow";
+import PostModal from "../../components/features/Post/PostShow";
 import style from "./HomePage.module.css";
 
 const HomePage = () => {
@@ -56,34 +56,34 @@ const HomePage = () => {
     }
   };
   const handleSearch = async (e) => {
-  e.preventDefault();
-  if (!searchQuery.trim()) {
-    // If search is empty, reset to normal feed
-    fetchRandomPosts();
-    return;
-  }
+    e.preventDefault();
+    if (!searchQuery.trim()) {
+      // If search is empty, reset to normal feed
+      fetchRandomPosts();
+      return;
+    }
 
-  try {
-    setLoading(true);
-    setError(null);
-    const searchResults = await PostAPI.search(searchQuery, {
-      page: 1,
-      limit: postsPerPage
-    });
-    
-    setPosts(searchResults);
-    setPage(1);
-    setHasMore(searchResults.length === postsPerPage);
-    
-    // Fetch user details for search results
-    await fetchUserDetails(searchResults);
-  } catch (err) {
-    console.error("Error searching posts:", err);
-    setError("Failed to search posts. Please try again later.");
-  } finally {
-    setLoading(false);
-  }
-};
+    try {
+      setLoading(true);
+      setError(null);
+      const searchResults = await PostAPI.search(searchQuery, {
+        page: 1,
+        limit: postsPerPage,
+      });
+
+      setPosts(searchResults);
+      setPage(1);
+      setHasMore(searchResults.length === postsPerPage);
+
+      // Fetch user details for search results
+      await fetchUserDetails(searchResults);
+    } catch (err) {
+      console.error("Error searching posts:", err);
+      setError("Failed to search posts. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Initial load of posts
   const fetchRandomPosts = async () => {
@@ -169,34 +169,34 @@ const HomePage = () => {
     <div className={style.homePage}>
       <h1 className={style.heading}>Discover Posts</h1>
 
-    <div className={style.searchContainer}>
-      <form onSubmit={handleSearch}>
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search posts..."
-          className={style.searchInput}
-        />
-        <button type="submit" className={style.searchButton}>
-          Search
-        </button>
-        {searchQuery && (
-          <button 
-            type="button" 
-            onClick={() => {
-              setSearchQuery("");
-              fetchRandomPosts();
-            }}
-            className={style.clearButton}
-          >
-            Clear
+      <div className={style.searchContainer}>
+        <form onSubmit={handleSearch}>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search posts..."
+            className={style.searchInput}
+          />
+          <button type="submit" className={style.searchButton}>
+            Search
           </button>
-        )}
-      </form>
-    </div>
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => {
+                setSearchQuery("");
+                fetchRandomPosts();
+              }}
+              className={style.clearButton}
+            >
+              Clear
+            </button>
+          )}
+        </form>
+      </div>
 
-    <br />
+      <br />
 
       {loading && (
         <div className={style.loadingContainer}>
@@ -217,34 +217,36 @@ const HomePage = () => {
         </div>
       )}
 
-    {posts.map((post) => (
-  <div 
-    key={post.id} 
-    onClick={(e) => {
-      // Check if the click is on comments or emoji sections
-      const target = e.target;
-      const isCommentSection = target.closest('.comments-section');
-      const isEmojiSection = target.closest('.emoji-section');
-      const isButton = target.tagName.toLowerCase() === 'button';
-      const isInput = target.tagName.toLowerCase() === 'input';
-      const isTextArea = target.tagName.toLowerCase() === 'textarea';
-      const isCommentInput = target.closest('.comment-input');
-      
-      // Only open modal if not clicking on interactive elements
-      if (!isCommentSection && !isEmojiSection && !isButton && 
-          !isInput && !isTextArea && !isCommentInput) {
-        handlePostClick(post);
-      }
-    }}
-    className={style.postWrapper}
-  >
-    <Post
-      post={post}
-      user={users[post.userId]}
-      variant="external"
-    />
-  </div>
-))}
+      {posts.map((post) => (
+        <div
+          key={post.id}
+          onClick={(e) => {
+            // Check if the click is on comments or emoji sections
+            const target = e.target;
+            const isCommentSection = target.closest(".comments-section");
+            const isEmojiSection = target.closest(".emoji-section");
+            const isButton = target.tagName.toLowerCase() === "button";
+            const isInput = target.tagName.toLowerCase() === "input";
+            const isTextArea = target.tagName.toLowerCase() === "textarea";
+            const isCommentInput = target.closest(".comment-input");
+
+            // Only open modal if not clicking on interactive elements
+            if (
+              !isCommentSection &&
+              !isEmojiSection &&
+              !isButton &&
+              !isInput &&
+              !isTextArea &&
+              !isCommentInput
+            ) {
+              handlePostClick(post);
+            }
+          }}
+          className={style.postWrapper}
+        >
+          <Post post={post} user={users[post.userId]} variant="external" />
+        </div>
+      ))}
       {selectedPost && (
         <PostModal
           post={selectedPost}
