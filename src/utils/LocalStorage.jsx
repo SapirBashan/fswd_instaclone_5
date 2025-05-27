@@ -126,12 +126,9 @@ export const UserStorage = {
   logout: () => {
     const username = getCookie("current_user");
     if (username) {
-      // Set user data to expire in 20 minutes
+      // Remove user data from localStorage
       const userKey = `user_${username}`;
-      const userData = getItem(userKey);
-      if (userData) {
-        setItem(userKey, userData, 20);
-      }
+      removeItem(userKey);
 
       // Remove the cookie immediately
       removeCookie("current_user");

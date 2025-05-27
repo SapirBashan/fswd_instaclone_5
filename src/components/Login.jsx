@@ -17,15 +17,75 @@ const Login = ({ onLoginSuccess }) => {
   // Check account locks on mount
   useEffect(() => {
     checkAccountLocks();
+    cleanupExpiredAttempts(); // Clean expired attempts on mount
   }, []);
 
-  // Timer for locked accounts
+  // Timer for locked accounts and cleanup
   useEffect(() => {
     const timer = setupLockCountdownTimer();
+    const cleanupTimer = setupCleanupTimer();
+    
     return () => {
       if (timer) clearInterval(timer);
+      if (cleanupTimer) clearInterval(cleanupTimer);
     };
   }, [lockedAccounts, remainingTimes, formData.username]);
+
+  // Setup cleanup timer for expired attempts (runs every minute)
+  const setupCleanupTimer = () => {
+    return setInterval(() => {
+      cleanupExpiredAttempts();
+    }, 60000); // Check every minute
+  };
+
+  // Clean up expired login attempts (older than 5 minutes)
+  const cleanupExpiredAttempts = () => {
+    try {
+      const attemptsData = localStorage.getItem("loginAttempts");
+      if (!attemptsData) return;
+
+      const attempts = JSON.parse(attemptsData);
+      const now = Date.now();
+      const fiveMinutesInMs = 5 * 60 * 1000;
+      let hasChanges = false;
+
+      // Create new attempts object without expired entries
+      const cleanedAttempts = {};
+      
+      Object.keys(attempts).forEach((username) => {
+        const attemptData = attempts[username];
+        
+        // Handle old format (just numbers) by converting to new format
+        if (typeof attemptData === 'number') {
+          // If it's just a number, it's old data - remove it
+          hasChanges = true;
+          return;
+        }
+        
+        // Handle new format with timestamp
+        if (attemptData && attemptData.timestamp) {
+          if (now - attemptData.timestamp < fiveMinutesInMs) {
+            // Keep non-expired attempts
+            cleanedAttempts[username] = attemptData;
+          } else {
+            // This attempt has expired
+            hasChanges = true;
+          }
+        }
+      });
+
+      if (hasChanges) {
+        if (Object.keys(cleanedAttempts).length > 0) {
+          localStorage.setItem("loginAttempts", JSON.stringify(cleanedAttempts));
+        } else {
+          localStorage.removeItem("loginAttempts");
+        }
+      }
+    } catch (e) {
+      console.error("Error cleaning up expired attempts:", e);
+      localStorage.removeItem("loginAttempts");
+    }
+  };
 
   // Check if current username is locked
   const isCurrentUserLocked = () => {
@@ -111,14 +171,41 @@ const Login = ({ onLoginSuccess }) => {
     }
   };
 
-  // Security functions
+  // Security functions with improved timestamp tracking
   const getFailedAttempts = (username) => {
     try {
       const attemptsData = localStorage.getItem("loginAttempts");
       if (!attemptsData) return 0;
+      
       const attempts = JSON.parse(attemptsData);
-      return attempts[username] || 0;
+      const attemptData = attempts[username];
+      
+      if (!attemptData) return 0;
+      
+      // Handle old format (just numbers)
+      if (typeof attemptData === 'number') {
+        return attemptData;
+      }
+      
+      // Handle new format with timestamp
+      if (attemptData.timestamp && attemptData.count) {
+        const now = Date.now();
+        const fiveMinutesInMs = 5 * 60 * 1000;
+        
+        // Check if attempts have expired
+        if (now - attemptData.timestamp > fiveMinutesInMs) {
+          // Expired, remove this entry
+          delete attempts[username];
+          localStorage.setItem("loginAttempts", JSON.stringify(attempts));
+          return 0;
+        }
+        
+        return attemptData.count;
+      }
+      
+      return 0;
     } catch (e) {
+      console.error("Error getting failed attempts:", e);
       return 0;
     }
   };
@@ -127,10 +214,22 @@ const Login = ({ onLoginSuccess }) => {
     try {
       const attemptsData = localStorage.getItem("loginAttempts");
       const attempts = attemptsData ? JSON.parse(attemptsData) : {};
-      attempts[username] = (attempts[username] || 0) + 1;
+      const now = Date.now();
+      
+      // Get current attempts (with expiration check)
+      const currentAttempts = getFailedAttempts(username);
+      const newCount = Math.min(currentAttempts + 1, 5); // Cap at 5 attempts max
+      
+      // Store with timestamp
+      attempts[username] = {
+        count: newCount,
+        timestamp: now
+      };
+      
       localStorage.setItem("loginAttempts", JSON.stringify(attempts));
-      return attempts[username];
+      return newCount;
     } catch (e) {
+      console.error("Error recording failed attempt:", e);
       return 1;
     }
   };
@@ -142,7 +241,12 @@ const Login = ({ onLoginSuccess }) => {
         const attempts = JSON.parse(attemptsData);
         if (attempts[username]) {
           delete attempts[username];
-          localStorage.setItem("loginAttempts", JSON.stringify(attempts));
+          
+          if (Object.keys(attempts).length > 0) {
+            localStorage.setItem("loginAttempts", JSON.stringify(attempts));
+          } else {
+            localStorage.removeItem("loginAttempts");
+          }
         }
       }
     } catch (e) {
@@ -212,7 +316,9 @@ const Login = ({ onLoginSuccess }) => {
       const result = await UserAPI.login(formData.username, formData.password);
 
       if (result.success) {
+        // Success: Reset failed attempts for this user
         resetFailedAttempts(formData.username);
+        
         UserStorage.saveUser(
           {
             id: result.user.id,
