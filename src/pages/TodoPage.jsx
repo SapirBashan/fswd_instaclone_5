@@ -127,233 +127,203 @@ const TodoPage = () => {
     }
   };
 
- return (
-  <Container maxWidth="md">
-    <Paper 
-      elevation={3} 
-      sx={{ p: 3, mt: 3 }}
-    >
-      {/* Header */}
-      <Typography variant="h4" gutterBottom>
-        Todo List
-      </Typography>
-
-      {/* Search and Sort Controls */}
-      <Box 
-        sx={{ 
-          display: 'flex', 
-          gap: 2, 
-          mb: 3 
-        }}
-      >
-<TextField
-  size="small"
-  value={searchTerm}
-  onChange={(e) => setSearchTerm(e.target.value)}
-  placeholder="Search todos..."
-  sx={{
-    flexGrow: 1,
-    '& .MuiOutlinedInput-root': {
-      borderRadius: '6px',
-      paddingY: '0',
-      '& input': {
-        paddingY: '0.6rem',
-        paddingX: '1rem',
-        fontSize: '1rem',
-        lineHeight: 1.5,
+ const styles = {
+    container: {
+      p: 3,
+      mt: 3
+    },
+    searchContainer: {
+      display: 'flex',
+      gap: 2,
+      mb: 3
+    },
+    formControl: {
+      minWidth: 120
+    },
+    textField: {
+      flexGrow: 1,
+      '& .MuiOutlinedInput-root': {
+        borderRadius: '6px',
+        paddingY: '0',
+        '& input': {
+          paddingY: '0.6rem',
+          paddingX: '1rem',
+          fontSize: '1rem',
+          lineHeight: 1.5,
+        },
+      },
+      '& .MuiOutlinedInput-notchedOutline': {
+        border: 'none',
       },
     },
-    '& .MuiOutlinedInput-notchedOutline': {
-      border: 'none',
+    listItem: {
+      borderBottom: '1px solid #eee',
+      '&:last-child': { borderBottom: 'none' }
     },
-  }}
-  variant="outlined"
-/>
+    completedText: {
+      textDecoration: 'line-through',
+      color: 'text.secondary'
+    },
+    normalText: {
+      textDecoration: 'none',
+      color: 'text.primary'
+    },
+    idText: {
+      mr: 2,
+      color: 'text.secondary'
+    },
+    editButton: {
+      mr: 1
+    }
+  };
 
-        
-        {/* Search By Dropdown */}
-        <FormControl 
-          size="small" 
-          sx={{ minWidth: 120 }}
-        >
-          <InputLabel>Search By</InputLabel>
-          <Select
-            value={searchBy}
-            label="Search By"
-            onChange={(e) => setSearchBy(e.target.value)}
-          >
-            <MenuItem value="id">ID</MenuItem>
-            <MenuItem value="title">Title</MenuItem>
-            <MenuItem value="completed">Status</MenuItem>
-          </Select>
-        </FormControl>
+  // Form configurations
+  const searchByOptions = [
+    { value: 'id', label: 'ID' },
+    { value: 'title', label: 'Title' },
+    { value: 'completed', label: 'Status' }
+  ];
 
-        {/* Sort By Dropdown */}
-        <FormControl 
-          size="small" 
-          sx={{ minWidth: 120 }}
-        >
-          <InputLabel>Sort By</InputLabel>
-          <Select
-            value={sortBy}
-            label="Sort By"
-            onChange={(e) => setSortBy(e.target.value)}
-          >
-            <MenuItem value="id">ID</MenuItem>
-            <MenuItem value="title">Title</MenuItem>
-            <MenuItem value="completed">Status</MenuItem>
-          </Select>
-        </FormControl>
-      </Box>
+  const sortByOptions = [
+    { value: 'id', label: 'ID' },
+    { value: 'title', label: 'Title' },
+    { value: 'completed', label: 'Status' }
+  ];
 
-      {/* Add New Todo Form */}
-      <Box 
-        component="form" 
-        onSubmit={handleAddTodo} 
-        sx={{ mb: 3 }}
-      >
-        <Box sx={{ display: 'flex', gap: 2 }}>
-        <TextField
-                fullWidth
-                size="small"
-                label="New Todo"
-                placeholder="New todo title..."
-                value={newTodoTitle}
-                onChange={(e) => setNewTodoTitle(e.target.value)}
-                variant="outlined"
-                sx={{
-                    '& .MuiOutlinedInput-root': {
-                    borderRadius: '6px',
-                    paddingY: '0', // reset vertical padding on container
-                    '& input': {
-                        paddingY: '0.6rem',  // vertical padding on input
-                        paddingX: '1rem',    // horizontal padding
-                        fontSize: '1rem',
-                        lineHeight: 1.5,
-                    },
-                    },
-                    '& .MuiOutlinedInput-notchedOutline': {
-                    border: 'none',
-                    },
-                }}
-                />
+  return (
+    <Container maxWidth="md">
+      <Paper elevation={3} sx={styles.container}>
+        <Typography variant="h4" gutterBottom>
+          Todo List
+        </Typography>
 
-
-
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-          >
-            Add Todo
-          </Button>
-        </Box>
-      </Box>
-
-      {/* Error Message */}
-      {error && (
-        <Alert 
-          severity="error" 
-          onClose={() => setError(null)}
-          sx={{ mb: 2 }}
-        >
-          {error}
-        </Alert>
-      )}
-
-      {/* Loading Spinner */}
-      {loading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
-          <CircularProgress />
-        </Box>
-      )}
-
-      {/* Todos List */}
-      <List>
-        {getSortedTodos().map(todo => (
-          <ListItem
-            key={todo.id}
-            sx={{
-              borderBottom: '1px solid #eee',
-              '&:last-child': { borderBottom: 'none' }
-            }}
-          >
-            <Checkbox
-              checked={todo.completed}
-              onChange={() => handleUpdateTodo(todo.id, {
-                ...todo,
-                completed: !todo.completed
-              })}
-            />
-            
-            {editingTodo?.id === todo.id ? (
+        <Box sx={styles.searchContainer}>
           <TextField
-            fullWidth
             size="small"
-            value={editingTodo.title}
-            onChange={(e) =>
-              setEditingTodo({
-                ...editingTodo,
-                title: e.target.value,
-              })
-            }
-            onBlur={() => handleUpdateTodo(todo.id, editingTodo)}
-            autoFocus
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search todos..."
+            sx={styles.textField}
             variant="outlined"
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                borderRadius: '6px',
-                paddingY: '0',
-                '& input': {
-                  paddingY: '0.6rem',
-                  paddingX: '1rem',
-                  fontSize: '1rem',
-                  lineHeight: 1.5,
-                },
-              },
-              '& .MuiOutlinedInput-notchedOutline': {
-                border: 'none',
-              },
-            }}
           />
 
-            ) : (
-              <ListItemText
-                primary={todo.title}
-                sx={{
-                  textDecoration: todo.completed ? 'line-through' : 'none',
-                  color: todo.completed ? 'text.secondary' : 'text.primary'
-                }}
-              />
-            )}
+          <FormControl size="small" sx={styles.formControl}>
+            <InputLabel>Search By</InputLabel>
+            <Select
+              value={searchBy}
+              label="Search By"
+              onChange={(e) => setSearchBy(e.target.value)}
+            >
+              {searchByOptions.map(option => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
-            <Box component="span">
-              <Typography 
-                variant="caption" 
-                sx={{ mr: 2, color: 'text.secondary' }}
-              >
-                ID: {todo.id}
-              </Typography>
-              <IconButton
-                edge="end"
-                onClick={() => setEditingTodo(todo)}
-                sx={{ mr: 1 }}
-              >
-                <EditIcon />
-              </IconButton>
-              <IconButton
-                edge="end"
-                onClick={() => handleDeleteTodo(todo.id)}
-                color="error"
-              >
-                <DeleteIcon />
-              </IconButton>
-            </Box>
-          </ListItem>
-        ))}
-      </List>
-    </Paper>
-  </Container>
-);
+          <FormControl size="small" sx={styles.formControl}>
+            <InputLabel>Sort By</InputLabel>
+            <Select
+              value={sortBy}
+              label="Sort By"
+              onChange={(e) => setSortBy(e.target.value)}
+            >
+              {sortByOptions.map(option => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
+
+        <Box component="form" onSubmit={handleAddTodo} sx={{ mb: 3 }}>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField
+              fullWidth
+              size="small"
+              label="New Todo"
+              placeholder="New todo title..."
+              value={newTodoTitle}
+              onChange={(e) => setNewTodoTitle(e.target.value)}
+              variant="outlined"
+              sx={styles.textField}
+            />
+            <Button type="submit" variant="contained" color="primary">
+              Add Todo
+            </Button>
+          </Box>
+        </Box>
+
+        {error && (
+          <Alert severity="error" onClose={() => setError(null)} sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
+
+        {loading && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
+            <CircularProgress />
+          </Box>
+        )}
+
+        <List>
+          {getSortedTodos().map(todo => (
+            <ListItem key={todo.id} sx={styles.listItem}>
+              <Checkbox
+                checked={todo.completed}
+                onChange={() => handleUpdateTodo(todo.id, {
+                  ...todo,
+                  completed: !todo.completed
+                })}
+              />
+              
+              {editingTodo?.id === todo.id ? (
+                <TextField
+                  fullWidth
+                  size="small"
+                  value={editingTodo.title}
+                  onChange={(e) => setEditingTodo({
+                    ...editingTodo,
+                    title: e.target.value,
+                  })}
+                  onBlur={() => handleUpdateTodo(todo.id, editingTodo)}
+                  autoFocus
+                  variant="outlined"
+                  sx={styles.textField}
+                />
+              ) : (
+                <ListItemText
+                  primary={todo.title}
+                  sx={todo.completed ? styles.completedText : styles.normalText}
+                />
+              )}
+
+              <Box component="span">
+                <Typography variant="caption" sx={styles.idText}>
+                  ID: {todo.id}
+                </Typography>
+                <IconButton
+                  edge="end"
+                  onClick={() => setEditingTodo(todo)}
+                  sx={styles.editButton}
+                >
+                  <EditIcon />
+                </IconButton>
+                <IconButton
+                  edge="end"
+                  onClick={() => handleDeleteTodo(todo.id)}
+                  color="error"
+                >
+                  <DeleteIcon />
+                </IconButton>
+              </Box>
+            </ListItem>
+          ))}
+        </List>
+      </Paper>
+    </Container>
+  );
 };
 export default TodoPage;
