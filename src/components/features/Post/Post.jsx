@@ -37,6 +37,7 @@ const Post = ({
   };
 
   const toggleComments = () => {
+    console.log("Toggling comments for post:", post.id, typeof post.id);
     setShowComments(!showComments);
   };
 

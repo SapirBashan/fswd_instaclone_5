@@ -13,6 +13,7 @@ const Comments = ({ postId, isVisible, onToggle }) => {
 
   useEffect(() => {
     if (isVisible && postId) {
+      console.log("Comments component - fetching for postId:", postId, typeof postId);
       fetchComments();
     }
   }, [isVisible, postId]);
@@ -22,11 +23,26 @@ const Comments = ({ postId, isVisible, onToggle }) => {
       setLoading(true);
       setError(null);
 
-      const commentsData = await CommentAPI.getByPost(postId);
-      setComments(commentsData);
+      // Ensure postId is properly converted
+      const targetPostId = typeof postId === 'string' ? parseInt(postId) : postId;
+      
+      console.log("Fetching comments for postId:", targetPostId);
+
+      const commentsData = await CommentAPI.getByPost(targetPostId);
+      
+      console.log("Fetched comments:", commentsData);
+
+      // Sort comments by creation date (newest first)
+      const sortedComments = commentsData.sort((a, b) => {
+        const dateA = new Date(a.createdAt || 0);
+        const dateB = new Date(b.createdAt || 0);
+        return dateB - dateA;
+      });
+
+      setComments(sortedComments);
 
       // Fetch user details for comments
-      await fetchUserDetails(commentsData);
+      await fetchUserDetails(sortedComments);
     } catch (err) {
       console.error("Error fetching comments:", err);
       setError("Failed to load comments");
@@ -76,7 +92,19 @@ const Comments = ({ postId, isVisible, onToggle }) => {
     setUsers(userDetails);
   };
 
-  const handleCommentAdded = (newComment) => {
+  const handleCommentAdded = async (newComment) => {
+    console.log("Comment added:", newComment, "for postId:", postId);
+    
+    // Verify the comment belongs to this post
+    const targetPostId = typeof postId === 'string' ? parseInt(postId) : postId;
+    const commentPostId = typeof newComment.postId === 'string' ? parseInt(newComment.postId) : newComment.postId;
+    
+    if (commentPostId !== targetPostId) {
+      console.error("Comment postId mismatch:", commentPostId, "vs", targetPostId);
+      return;
+    }
+
+    // Immediately add to local state
     setComments((prev) => [newComment, ...prev]);
 
     // Add current user to users if not already there
@@ -87,6 +115,11 @@ const Comments = ({ postId, isVisible, onToggle }) => {
         [currentUser.email]: currentUser,
       }));
     }
+
+    // Optionally refresh comments after a short delay to ensure consistency
+    setTimeout(() => {
+      fetchComments();
+    }, 500);
   };
 
   const handleCommentDelete = (commentId) => {
@@ -130,7 +163,7 @@ const Comments = ({ postId, isVisible, onToggle }) => {
   return (
     <div className={styles.commentsSection}>
       <div className={styles.commentsHeader}>
-        <h4>Comments ({comments.length})</h4>
+        <h4>Comments ({comments.length}) - Post ID: {postId}</h4>
         <button onClick={onToggle} className={styles.closeButton}>
           ✕
         </button>

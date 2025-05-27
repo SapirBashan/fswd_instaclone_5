@@ -23,14 +23,32 @@ const CommentForm = ({ postId, onCommentAdded }) => {
         return;
       }
 
+      // Debug logging
+      console.log("Creating comment for postId:", postId, typeof postId);
+
+      // Ensure postId is properly handled
+      const targetPostId = typeof postId === 'string' ? parseInt(postId) : postId;
+      
+      if (!targetPostId || isNaN(targetPostId)) {
+        setError("Invalid post ID");
+        console.error("Invalid postId:", postId);
+        return;
+      }
+
       // Create comment with the correct structure matching the API
-      const newComment = await CommentAPI.create({
-        postId: parseInt(postId),
+      const commentData = {
+        postId: targetPostId,
         name: currentUser.name || currentUser.username,
         email: currentUser.email,
         body: commentText.trim(),
         createdAt: new Date().toISOString(),
-      });
+      };
+
+      console.log("Comment data being sent:", commentData);
+
+      const newComment = await CommentAPI.create(commentData);
+      
+      console.log("Comment created successfully:", newComment);
 
       onCommentAdded(newComment);
       setCommentText("");
