@@ -217,7 +217,7 @@ const HomePage = () => {
         </div>
       )}
 
-     {posts.map((post) => (
+    {posts.map((post) => (
   <div 
     key={post.id} 
     onClick={(e) => {
@@ -227,9 +227,12 @@ const HomePage = () => {
       const isEmojiSection = target.closest('.emoji-section');
       const isButton = target.tagName.toLowerCase() === 'button';
       const isInput = target.tagName.toLowerCase() === 'input';
+      const isTextArea = target.tagName.toLowerCase() === 'textarea';
+      const isCommentInput = target.closest('.comment-input');
       
       // Only open modal if not clicking on interactive elements
-      if (!isCommentSection && !isEmojiSection && !isButton && !isInput) {
+      if (!isCommentSection && !isEmojiSection && !isButton && 
+          !isInput && !isTextArea && !isCommentInput) {
         handlePostClick(post);
       }
     }}
